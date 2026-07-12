@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ur Sandhai — Prototype</title>
+<style>
+  body{font-family:Calibri,Arial,sans-serif;max-width:1000px;margin:30px auto;color:#20281D;background:#EDE8D6;padding:0 16px;}
+  #us-root{background:#EDE8D6;border-radius:16px;padding:1.5rem;}
+  #us-root h1{font-family:Georgia,'Cambria',serif;font-size:30px;font-weight:700;margin:0 0 2px;color:#14261A;}
+  #us-root .tag{font-size:13px;color:#51604C;margin-bottom:1.2rem;}
+  #us-root .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  #us-root .card{background:#FFFFFF;border-radius:12px;padding:16px 18px;border:1px solid #DCD5BE;}
+  #us-root label{display:block;font-size:12px;font-weight:700;color:#51604C;margin:10px 0 4px;}
+  #us-root select,#us-root input{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid #C9C1A5;font-size:14px;background:#FBF9F2;color:#20281D;}
+  #us-root button{cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:700;}
+  #us-root .btn-primary{background:#1F4A2C;color:#fff;width:100%;margin-top:12px;}
+  #us-root .btn-primary:hover{background:#163A21;}
+  #us-root .btn-mic{background:#E3A94A;color:#3A2A05;margin-top:8px;width:100%;}
+  #us-root .btn-mic:hover{background:#D69B39;}
+  #us-root .reco{background:#14261A;color:#F4F1E6;border-radius:12px;padding:18px;margin-top:14px;}
+  #us-root .reco h3{margin:0 0 8px;font-size:16px;color:#E3A94A;font-family:Georgia,serif;}
+  #us-root .reco p{margin:5px 0;font-size:14px;line-height:1.55;}
+  #us-root .reco .ta{font-size:15px;margin-top:10px;padding-top:10px;border-top:1px solid #33472F;}
+  #us-root .note{font-size:12px;color:#7A8375;margin-top:12px;line-height:1.55;}
+  #us-root .pill{display:inline-block;background:#E7F3E0;color:#2C4A22;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;margin:3px 4px 3px 0;}
+  #us-root .reportsList{max-height:160px;overflow:auto;font-size:12px;margin-top:8px;}
+  #us-root .reportsList div{padding:4px 0;border-bottom:1px solid #EEE9D8;}
+  #us-root svg{background:#FBF9F2;border-radius:10px;}
+</style>
+</head>
+<body>
+<div id="us-root">
+<h1>Ur Sandhai — working prototype</h1>
+<div class="tag">Mock voice/photo capture stand-ins, real geo-radius and recommendation logic, a live map, and bilingual speech output. Open this file directly in Chrome for microphone and speech features to work.</div>
+<div class="grid">
+<div class="card">
+<div style="font-size:14px;font-weight:700;">Your location</div>
+<select id="us-village"></select>
+<div style="font-size:14px;font-weight:700;margin-top:14px;">Report a sale</div>
+<label>Crop</label>
+<select id="us-crop"></select>
+<label>Price (₹/kg)</label>
+<input id="us-price" type="number" placeholder="e.g. 30" />
+<label>Quantity (kg)</label>
+<input id="us-qty" type="number" placeholder="e.g. 50" />
+<label>Demand felt</label>
+<select id="us-demand"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+<button class="btn-mic" id="us-mic">Speak instead (stand-in for Amazon Transcribe)</button>
+<button class="btn-primary" id="us-submit">Submit report and refresh recommendation</button>
+<div class="note" id="us-mic-status"></div>
+<div style="font-size:13px;font-weight:700;margin-top:14px;">Recent reports within 10km</div>
+<div class="reportsList" id="us-reports"></div>
+</div>
+<div class="card">
+<div style="font-size:14px;font-weight:700;margin-bottom:8px;">Live 10km radius map</div>
+<svg id="us-map" width="100%" height="260" viewBox="0 0 320 230"></svg>
+<div class="reco" id="us-reco"></div>
+<div class="note">In production, voice becomes text via Amazon Transcribe and Comprehend, photos are read by Rekognition and Textract, forecasts run on Prophet and scikit-learn, and Amazon Polly speaks the answer over WhatsApp. This prototype swaps those for the browser's own free speech APIs and a local version of the same scoring logic, so the recommendation math is real; only the AWS calls are stood in for.</div>
+</div>
+</div>
+</div>
+<script>
+(function(){
+var CROPS={tomato:{en:"Tomato",ta:"தக்காளி"},brinjal:{en:"Brinjal",ta:"கத்தரிக்காய்"},okra:{en:"Okra",ta:"வெண்டைக்காய்"},onion:{en:"Onion",ta:"வெங்காயம்"},chilli:{en:"Chilli",ta:"மிளகாய்"}};
+var BASELINE={tomato:28,brinjal:20,okra:24,onion:16,chilli:60};
+var VILLAGES=[{id:"v1",name:"Thanjavur Road",lat:10.79,lng:79.14},{id:"v2",name:"Kumbakonam Extension",lat:10.96,lng:79.38},{id:"v3",name:"Mannargudi Bypass",lat:10.66,lng:79.45}];
+var now=Date.now();
+function hrsAgo(h){return now-h*3600*1000;}
+var reports=[
+{crop:"tomato",price:32,qty:40,demand:"high",time:hrsAgo(1.5),dLat:0.01,dLng:0.02},
+{crop:"tomato",price:29,qty:60,demand:"high",time:hrsAgo(4),dLat:-0.02,dLng:0.03},
+{crop:"tomato",price:24,qty:90,demand:"medium",time:hrsAgo(20),dLat:0.03,dLng:-0.01},
+{crop:"brinjal",price:22,qty:35,demand:"medium",time:hrsAgo(3),dLat:-0.015,dLng:-0.02},
+{crop:"brinjal",price:19,qty:70,demand:"low",time:hrsAgo(26),dLat:0.02,dLng:0.015},
+{crop:"okra",price:27,qty:20,demand:"high",time:hrsAgo(2),dLat:0.005,dLng:-0.03},
+{crop:"okra",price:23,qty:55,demand:"medium",time:hrsAgo(30),dLat:-0.03,dLng:0.01},
+{crop:"onion",price:15,qty:120,demand:"low",time:hrsAgo(10),dLat:0.025,dLng:0.025},
+{crop:"onion",price:18,qty:30,demand:"medium",time:hrsAgo(6),dLat:-0.01,dLng:-0.015},
+{crop:"chilli",price:64,qty:15,demand:"high",time:hrsAgo(1),dLat:0.008,dLng:0.006},
+{crop:"chilli",price:58,qty:25,demand:"medium",time:hrsAgo(15),dLat:-0.02,dLng:-0.03},
+{crop:"tomato",price:20,qty:200,demand:"low",time:hrsAgo(9),dLat:0.09,dLng:0.09}
+];
+var state={villageId:"v1"};
+function center(){var v=VILLAGES.find(function(x){return x.id===state.villageId});return v;}
+function haversine(lat1,lng1,lat2,lng2){var R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.sqrt(a));}
+function nearby(){var c=center();return reports.map(function(r){var lat=c.lat+r.dLat,lng=c.lng+r.dLng;var dist=haversine(c.lat,c.lng,lat,lng);return Object.assign({},r,{lat:lat,lng:lng,dist:dist});}).filter(function(r){return r.dist<=10 && (now-r.time)<=72*3600*1000;});
+}
+function fillSelects(){
+var vs=document.getElementById("us-village");vs.innerHTML=VILLAGES.map(function(v){return '<option value="'+v.id+'">'+v.name+'</option>';}).join("");
+vs.value=state.villageId;
+vs.onchange=function(){state.villageId=vs.value;render();};
+var cs=document.getElementById("us-crop");cs.innerHTML=Object.keys(CROPS).map(function(k){return '<option value="'+k+'">'+CROPS[k].en+' / '+CROPS[k].ta+'</option>';}).join("");
+}
+function priorityScore(reps,crop){
+var list=reps.filter(function(r){return r.crop===crop;});
+if(!list.length) return null;
+var avgPrice=list.reduce(function(a,r){return a+r.price;},0)/list.length;
+var demandW={high:3,medium:2,low:1};
+var demandScore=list.reduce(function(a,r){return a+demandW[r.demand];},0)/list.length;
+var supply=list.reduce(function(a,r){return a+r.qty;},0);
+var base=BASELINE[crop];
+var score=(avgPrice/base)*0.5+(demandScore/3)*0.35-(Math.min(supply,300)/300)*0.15;
+return {crop:crop,avgPrice:avgPrice,demandScore:demandScore,supply:supply,score:score,count:list.length};
+}
+function bestWindow(reps){
+if(!reps.length) return null;
+var buckets={};
+reps.forEach(function(r){var h=new Date(r.time).getHours();var b=Math.floor(h/2)*2;var key=b+"-"+(b+2);buckets[key]=buckets[key]||{sum:0,n:0};buckets[key].sum+=r.price/BASELINE[r.crop];buckets[key].n++;});
+var best=null;
+Object.keys(buckets).forEach(function(k){var avg=buckets[k].sum/buckets[k].n;if(!best||avg>best.avg){best={window:k,avg:avg};}});
+return best;
+}
+function fmtWindow(w){
+if(!w) return "6:00 AM – 8:00 AM";
+var s=parseInt(w.window.split("-")[0],10),e=s+2;
+function to12(h){var ap=h<12?"AM":"PM";var hh=h%12;if(hh===0)hh=12;return hh+":00 "+ap;}
+return to12(s)+" – "+to12(e);
+}
+function renderMap(reps){
+var svg=document.getElementById("us-map");var W=320,H=230,cx=W/2,cy=H/2,Rpx=95,Rkm=10;
+var parts=[];
+parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+Rpx+'" fill="none" stroke="#B9C9AE" stroke-width="1" stroke-dasharray="3,3"/>');
+parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+(Rpx*0.5)+'" fill="none" stroke="#CFDBC5" stroke-width="0.7" stroke-dasharray="2,3"/>');
+parts.push('<text x="'+cx+'" y="'+(cy-Rpx-6)+'" font-size="8" fill="#7A8B6E" text-anchor="middle" font-weight="700">10 KM RADIUS</text>');
+var c=center();
+reps.forEach(function(r){
+var dxKm=(r.lng-c.lng)*Math.cos(c.lat*Math.PI/180)*111.32;
+var dyKm=(r.lat-c.lat)*110.57;
+var x=cx+(dxKm/Rkm)*Rpx, y=cy-(dyKm/Rkm)*Rpx;
+parts.push('<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#CDBD8A" stroke-width="0.6"/>');
+parts.push('<circle cx="'+x+'" cy="'+y+'" r="4" fill="#E3A94A" stroke="#fff" stroke-width="1"><title>'+CROPS[r.crop].en+' ₹'+r.price+'/kg</title></circle>');
+});
+parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="#fff" stroke="#1F4A2C" stroke-width="2"/>');
+parts.push('<text x="'+cx+'" y="'+(cy+16)+'" font-size="8" fill="#1F4A2C" text-anchor="middle" font-weight="700">YOU</text>');
+svg.innerHTML=parts.join("");
+}
+function renderReports(reps){
+var el=document.getElementById("us-reports");
+if(!reps.length){el.innerHTML='<div>No reports yet in range.</div>';return;}
+el.innerHTML=reps.sort(function(a,b){return b.time-a.time;}).map(function(r){
+var hrs=((now-r.time)/3600000).toFixed(0);
+return '<div>'+CROPS[r.crop].en+' — ₹'+r.price+'/kg — '+r.dist.toFixed(1)+'km away — '+hrs+'h ago — demand '+r.demand+'</div>';
+}).join("");
+}
+function renderRecommendation(reps){
+var el=document.getElementById("us-reco");
+if(reps.length<5){
+el.innerHTML='<h3>Not enough local reports yet</h3><p>Showing the government Agmarknet baseline until more neighbours report. Try submitting a report or picking a different village.</p><p>' +
+Object.keys(BASELINE).map(function(k){return CROPS[k].en+' ₹'+BASELINE[k]+'/kg';}).join(', ')+'</p>';
+return;
+}
+var scores=Object.keys(CROPS).map(function(k){return priorityScore(reps,k);}).filter(Boolean).sort(function(a,b){return b.score-a.score;});
+var top=scores.slice(0,3);
+var w=bestWindow(reps);
+var windowStr=fmtWindow(w);
+var top1=top[0];
+var enMsg='Best time to sell today: '+windowStr+'. Top crop right now: '+CROPS[top1.crop].en+' at an average of ₹'+top1.avgPrice.toFixed(0)+'/kg from '+top1.count+' nearby reports, with '+(top1.demandScore>=2.3?"strong":"moderate")+' demand.';
+var taMsg='இன்று விற்க சிறந்த நேரம்: '+windowStr+'. இப்போது முன்னுரிமை: '+CROPS[top1.crop].ta+' சராசரி விலை ₹'+top1.avgPrice.toFixed(0)+'/கிலோ.';
+var pills=top.map(function(t){return '<span class="pill">'+CROPS[t.crop].en+' ₹'+t.avgPrice.toFixed(0)+'</span>';}).join("");
+el.innerHTML='<h3>Recommendation</h3><p>'+enMsg+'</p><div>'+pills+'</div><p class="ta">'+taMsg+'</p><button class="btn-mic" id="us-speak" style="margin-top:10px;">Read aloud (stand-in for Amazon Polly)</button>';
+document.getElementById("us-speak").onclick=function(){
+try{
+var u=new SpeechSynthesisUtterance(taMsg);u.lang="ta-IN";window.speechSynthesis.cancel();window.speechSynthesis.speak(u);
+}catch(e){document.getElementById("us-mic-status").textContent="Speech playback isn't available in this browser.";}
+};
+}
+function render(){
+var reps=nearby();
+renderMap(reps);
+renderReports(reps);
+renderRecommendation(reps);
+}
+document.getElementById("us-submit").onclick=function(){
+var crop=document.getElementById("us-crop").value;
+var price=parseFloat(document.getElementById("us-price").value);
+var qty=parseFloat(document.getElementById("us-qty").value);
+var demand=document.getElementById("us-demand").value;
+if(!price||!qty){document.getElementById("us-mic-status").textContent="Enter a price and quantity first.";return;}
+reports.push({crop:crop,price:price,qty:qty,demand:demand,time:Date.now(),dLat:(Math.random()-0.5)*0.05,dLng:(Math.random()-0.5)*0.05});
+document.getElementById("us-mic-status").textContent="Report added.";
+render();
+};
+document.getElementById("us-mic").onclick=function(){
+var status=document.getElementById("us-mic-status");
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){status.textContent="Voice capture needs Chrome and microphone access.";return;}
+try{
+var rec=new SR();rec.lang="ta-IN";rec.interimResults=false;
+status.textContent="Listening...";
+rec.onresult=function(e){
+var text=e.results[0][0].transcript;
+status.textContent='Heard: "'+text+'" — parsing crop and price (stand-in for Comprehend).';
+var priceMatch=text.match(/(\d+)/);
+if(priceMatch) document.getElementById("us-price").value=priceMatch[1];
+Object.keys(CROPS).forEach(function(k){if(text.indexOf(CROPS[k].ta)>-1||text.toLowerCase().indexOf(k)>-1){document.getElementById("us-crop").value=k;}});
+};
+rec.onerror=function(){status.textContent="Couldn't access the microphone.";};
+rec.start();
+}catch(e){status.textContent="Voice capture isn't available in this browser.";}
+};
+fillSelects();
+render();
+})();
+</script>
+</body>
+</html>
