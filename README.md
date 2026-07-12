@@ -6,8 +6,9 @@ market intelligence app for smallholder farmers, built for the *AI for Bharat* h
 
 ## What this is
 
-A single-file, self-contained web prototype (`index.html`) — open it directly in a browser,
-no build step, no server required.
+A single-file, self-contained web prototype (`index.html`) with a glassmorphic, dark
+"dusk over farmland" interface — open it directly in a browser, no build step, no server
+required.
 
 **What's real:**
 - Haversine-based 10km geo-radius filtering of crowd-sourced reports
@@ -31,7 +32,8 @@ Agmarknet via data.gov.in).
 
 Just open `index.html` in Chrome. Voice input and Tamil text-to-speech need microphone
 permission and work best when the file is opened as a real local file (not embedded in an
-iframe).
+iframe). The interface uses real CSS glassmorphism (`backdrop-filter: blur`), so a modern
+browser is recommended.
 
 ## Roadmap
 
