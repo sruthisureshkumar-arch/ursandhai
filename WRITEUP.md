@@ -100,8 +100,48 @@ works), is not wired into this build yet. It's scoped as the next milestone.
 | Forecasting | A real OLS linear regression on crowd reports, computed client-side | Prophet and scikit-learn, retrained nightly via a free GitHub Actions workflow |
 | Government dataset | A small hard-coded baseline dictionary standing in for the real feed | Agmarknet mandi prices and arrivals, pulled from data.gov.in at no cost, maintained by the Ministry of Agriculture and Farmers Welfare |
 | Hosting | GitHub Pages, free static hosting | Same for the demo; a small backend (Lambda or similar) once reports need to persist across visitors |
-| Data storage | In-memory JavaScript array, resets on page reload | Supabase Postgres free tier, chosen for built-in geo queries |
+| Data storage | Browser localStorage, so a demo session survives a page refresh | Supabase Postgres free tier, chosen for built-in geo queries |
 | Fonts | Playfair Display and Inter, served from Google Fonts | Same |
+
+## Feasibility, cost, and a path to scale
+
+Every piece of this prototype runs on free tiers with no ongoing bill:
+GitHub Pages for hosting, Google Fonts and Tesseract.js from free CDNs, and
+browser-native speech APIs. Nothing here can generate a surprise invoice
+because nothing paid is wired in yet.
+
+The production plan carries the same discipline forward rather than
+abandoning it once real cloud services are added. AWS credentials would
+never touch the client; every AI call would run server-side behind
+authentication and rate limits, IAM roles would be scoped to a single
+service each, and a hard budget alarm would cut access automatically if
+spending ever moved past zero. Vision and speech calls are also scoped to
+migrate to self-hosted open-source equivalents (Whisper, Tesseract,
+Coqui TTS) once usage outgrows the AWS free tier, so cost stays flat rather
+than scaling with adoption.
+
+A realistic rollout looks like this: start with a handful of villages in
+one district, using the existing crowd-report flow and the Agmarknet
+baseline as the cold-start fallback. Once a district has enough regular
+reporters to keep the crowd data fresh, expand district by district rather
+than all at once, since the recommendation quality depends on having enough
+local reports, not just having the app installed. Cost per additional
+farmer stays close to zero throughout, since the architecture is
+serverless and free-tier by design, not something that gets expensive as
+adoption grows.
+
+## Social impact
+
+A farmer who doesn't know the fair price for their crop that day, in their
+own village, is at a structural disadvantage against a buyer who does. A
+five to ten percent improvement in the timing of a sale, or in catching a
+lowball offer before agreeing to it, is a small change per transaction but
+a meaningful and recurring one across a growing season, and across the
+roughly hundred million smallholder farmers in India who sell through
+exactly this kind of informal, local channel. The Sell Together nudge adds
+a second lever beyond individual price-checking: coordinated bargaining
+power, which has historically been available mainly to farmers already
+organized into cooperatives.
 
 ## Honest note on scope
 

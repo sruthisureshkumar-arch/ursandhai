@@ -107,6 +107,20 @@
   /* photo OCR control */
   #us-root .ocr-row{display:flex;gap:8px;margin-top:8px;}
   #us-root .ocr-row button{margin-top:0;flex:1;}
+
+  /* reset link */
+  #us-root .reset-link{display:inline-block;margin-top:10px;font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;font-family:inherit;}
+  #us-root .reset-link:hover{color:var(--olive-dark);}
+
+  /* mobile: stack the two-column layout, tighten spacing, keep the topbar from breaking */
+  @media (max-width: 760px){
+    #us-root{padding:0 16px 40px;}
+    .topbar{flex-wrap:wrap;gap:10px;padding:16px 0;}
+    .brand .name{font-size:17px;}
+    #us-root .grid{grid-template-columns:1fr;gap:16px;}
+    #us-root .card{padding:16px 18px;}
+    #us-root .ocr-row{flex-direction:column;}
+  }
 </style>
 </head>
 <body>
@@ -155,6 +169,7 @@
 <div class="card">
 <div class="section-label">Recent reports within 10km</div>
 <div class="reportsList" id="us-reports"></div>
+<button class="reset-link" id="us-reset">Reset sample data</button>
 </div>
 </div>
 <div>
@@ -181,7 +196,9 @@ var BASELINE={tomato:28,brinjal:20,okra:24,onion:16,chilli:60};
 var VILLAGES=[{id:"v1",name:"Thanjavur Road",lat:10.79,lng:79.14},{id:"v2",name:"Kumbakonam Extension",lat:10.96,lng:79.38},{id:"v3",name:"Mannargudi Bypass",lat:10.66,lng:79.45}];
 var now=Date.now();
 function hrsAgo(h){return now-h*3600*1000;}
-var reports=[
+var STORE_KEY="us_sandhai_reports_v1";
+function seedReports(){
+return[
 {crop:"tomato",price:32,qty:40,demand:"high",time:hrsAgo(1.5),dLat:0.01,dLng:0.02},
 {crop:"tomato",price:29,qty:60,demand:"high",time:hrsAgo(4),dLat:-0.02,dLng:0.03},
 {crop:"tomato",price:24,qty:90,demand:"medium",time:hrsAgo(20),dLat:0.03,dLng:-0.01},
@@ -195,6 +212,21 @@ var reports=[
 {crop:"chilli",price:58,qty:25,demand:"medium",time:hrsAgo(15),dLat:-0.02,dLng:-0.03},
 {crop:"tomato",price:20,qty:200,demand:"low",time:hrsAgo(9),dLat:0.09,dLng:0.09}
 ];
+}
+// Reports persist to localStorage so a judge's test submissions survive a
+// page refresh mid-demo; falls back silently to the in-memory seed data if
+// storage is unavailable (private browsing, etc).
+function loadReports(){
+try{
+var raw=localStorage.getItem(STORE_KEY);
+if(raw){var parsed=JSON.parse(raw);if(Array.isArray(parsed)&&parsed.length) return parsed;}
+}catch(e){}
+return seedReports();
+}
+function saveReports(){
+try{localStorage.setItem(STORE_KEY,JSON.stringify(reports));}catch(e){}
+}
+var reports=loadReports();
 var state={villageId:"v1"};
 function center(){var v=VILLAGES.find(function(x){return x.id===state.villageId});return v;}
 function haversine(lat1,lng1,lat2,lng2){var R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.sqrt(a));}
@@ -351,7 +383,14 @@ var qty=parseFloat(document.getElementById("us-qty").value);
 var demand=document.getElementById("us-demand").value;
 if(!price||!qty){document.getElementById("us-mic-status").textContent="Enter a price and quantity first.";return;}
 reports.push({crop:crop,price:price,qty:qty,demand:demand,time:Date.now(),dLat:(Math.random()-0.5)*0.05,dLng:(Math.random()-0.5)*0.05});
+saveReports();
 document.getElementById("us-mic-status").textContent="Report added.";
+render();
+};
+document.getElementById("us-reset").onclick=function(){
+try{localStorage.removeItem(STORE_KEY);}catch(e){}
+reports=seedReports();
+document.getElementById("us-mic-status").textContent="Sample data reset.";
 render();
 };
 document.getElementById("us-mic").onclick=function(){

@@ -25,6 +25,10 @@ required.
 - **Sell Together nudge** — flags real oversupply and suggests coordinating a sale
 - **Live price trend** — a real linear-regression model run on crowd reports
 - **Price-board OCR** — Tesseract.js reads a photographed price board in-browser
+- Reports persist to `localStorage`, so a demo session survives a page refresh, with a
+  one-click reset back to seeded sample data
+- Responsive layout that stacks to a single column on phone-sized screens, since the
+  actual users of something like this would be on a phone, not a desktop
 
 **What's currently stood in for** (clearly labeled in the UI), pending an AWS account:
 - Voice capture uses the browser's free Web Speech API instead of Amazon Transcribe + Comprehend
@@ -35,6 +39,15 @@ required.
 See [WRITEUP.md](./WRITEUP.md) for the full breakdown of what's real versus mocked and
 the intended production architecture (Transcribe, Comprehend, Rekognition, Textract,
 Polly, Prophet + scikit-learn, Agmarknet via data.gov.in).
+
+## Feasibility and cost safety
+
+Everything here runs on free tiers with no bill attached: GitHub Pages, free CDN fonts
+and libraries, and browser-native speech APIs. The production plan keeps that discipline
+going, AWS credentials never touch the client, every AI call runs server-side behind
+auth and rate limits, IAM is scoped per service, and a budget alarm cuts access if
+spending moves past zero. See [WRITEUP.md](./WRITEUP.md) for the rollout plan and the
+social impact case.
 
 ## Running it
 
