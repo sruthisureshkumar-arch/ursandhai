@@ -27,8 +27,10 @@ required.
 - **Price-board OCR** — Tesseract.js reads a photographed price board in-browser
 - Reports persist to `localStorage`, so a demo session survives a page refresh, with a
   one-click reset back to seeded sample data
-- Responsive layout that stacks to a single column on phone-sized screens, since the
-  actual users of something like this would be on a phone, not a desktop
+- A CSS breakpoint stacks the layout to a single column under 760px, since the actual
+  users of something like this would be on a phone, not a desktop — implemented with a
+  standard media query, but worth a quick check on a real phone before you demo it, since
+  it hasn't been screenshot-verified on an actual device
 
 **What's currently stood in for** (clearly labeled in the UI), pending an AWS account:
 - Voice capture uses the browser's free Web Speech API instead of Amazon Transcribe + Comprehend

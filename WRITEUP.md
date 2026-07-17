@@ -125,23 +125,26 @@ one district, using the existing crowd-report flow and the Agmarknet
 baseline as the cold-start fallback. Once a district has enough regular
 reporters to keep the crowd data fresh, expand district by district rather
 than all at once, since the recommendation quality depends on having enough
-local reports, not just having the app installed. Cost per additional
-farmer stays close to zero throughout, since the architecture is
-serverless and free-tier by design, not something that gets expensive as
-adoption grows.
+local reports, not just having the app installed. The intent is for cost
+per additional farmer to stay close to zero throughout, since the
+architecture is designed to be serverless and free-tier, but that's a
+design goal for a system that hasn't been built or tested at scale, not a
+measured outcome.
 
 ## Social impact
 
 A farmer who doesn't know the fair price for their crop that day, in their
 own village, is at a structural disadvantage against a buyer who does. A
 five to ten percent improvement in the timing of a sale, or in catching a
-lowball offer before agreeing to it, is a small change per transaction but
-a meaningful and recurring one across a growing season, and across the
-roughly hundred million smallholder farmers in India who sell through
-exactly this kind of informal, local channel. The Sell Together nudge adds
-a second lever beyond individual price-checking: coordinated bargaining
-power, which has historically been available mainly to farmers already
-organized into cooperatives.
+lowball offer before agreeing to it, is a reasonable illustrative estimate
+of what that could be worth given typical day-to-day mandi price swings,
+not a measured result. This prototype hasn't been piloted with real
+farmers, so there's no outcome data behind that figure yet. The Sell
+Together nudge is a narrower, more honest claim: it surfaces a suggestion
+to coordinate a shared sale when it detects real oversupply nearby. It
+doesn't give farmers a way to actually contact each other yet, so today
+it's a heads-up rather than a working coordination tool the way an
+organised cooperative would be.
 
 ## Honest note on scope
 
