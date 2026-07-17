@@ -2,7 +2,7 @@
 
 A working prototype for **Ur Sandhai** ("our marketplace"), a hyperlocal, crowd-sourced
 market intelligence app for smallholder farmers, built for the *AI for Bharat* hackathon
-(Agriculture & Rural Livelihoods track).
+(AgriTech track), submitted as an individual entry.
 
 **Live demo:** https://sruthisureshkumar-arch.github.io/ursandhai/
 **Write-up (tools, APIs, datasets):** [WRITEUP.md](./WRITEUP.md)

@@ -1,6 +1,6 @@
 # Ur Sandhai — Prototype Round Write-Up
 
-**Track:** Agriculture & Rural Livelihoods
+**Track:** AgriTech (crop advisory)
 **Live demo:** https://sruthisureshkumar-arch.github.io/ursandhai/
 **Source:** https://github.com/sruthisureshkumar-arch/ursandhai
 
