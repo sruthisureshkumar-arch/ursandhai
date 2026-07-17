@@ -4,10 +4,13 @@ A working prototype for **Ur Sandhai** ("our marketplace"), a hyperlocal, crowd-
 market intelligence app for smallholder farmers, built for the *AI for Bharat* hackathon
 (Agriculture & Rural Livelihoods track).
 
+**Live demo:** https://sruthisureshkumar-arch.github.io/ursandhai/
+**Write-up (tools, APIs, datasets):** [WRITEUP.md](./WRITEUP.md)
+
 ## What this is
 
-A single-file, self-contained web prototype (`index.html`) with a glassmorphic, dark
-"dusk over farmland" interface — open it directly in a browser, no build step, no server
+A single-file, self-contained web prototype (`index.html`) with a warm, editorial
+olive-and-cream interface — open it directly in a browser, no build step, no server
 required.
 
 **What's real:**
@@ -24,16 +27,16 @@ required.
 - "Read aloud" uses the browser's free speech synthesis instead of Amazon Polly
 - Crop photo recognition is a dropdown instead of Amazon Rekognition
 
-See the in-app note at the bottom of the recommendation panel for the intended production
-architecture (Transcribe, Comprehend, Rekognition, Textract, Polly, Prophet + scikit-learn,
-Agmarknet via data.gov.in).
+See [WRITEUP.md](./WRITEUP.md) for the full breakdown of what's real versus mocked and
+the intended production architecture (Transcribe, Comprehend, Rekognition, Textract,
+Polly, Prophet + scikit-learn, Agmarknet via data.gov.in).
 
 ## Running it
 
-Just open `index.html` in Chrome. Voice input and Tamil text-to-speech need microphone
-permission and work best when the file is opened as a real local file (not embedded in an
-iframe). The interface uses real CSS glassmorphism (`backdrop-filter: blur`), so a modern
-browser is recommended.
+Open the [live demo](https://sruthisureshkumar-arch.github.io/ursandhai/), or clone the
+repo and open `index.html` directly in Chrome. Voice input and Tamil text-to-speech need
+microphone permission and work best when opened as a real page (not embedded in an
+iframe).
 
 ## Roadmap
 
