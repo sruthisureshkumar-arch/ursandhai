@@ -18,61 +18,61 @@ without re-doing the screen capture.
 ## 0:00–0:08 — Hook
 **On screen:** Open the live app. Let the topbar and tagline sit for a beat.
 **Say:**
-> "This is Ur Sandhai — 'our marketplace' in Tamil. It's built for farmers
-> who have no way of knowing whether the price they're being offered right
-> now is actually fair."
+> "This is Ur Sandhai — 'our marketplace' in Tamil. It's built for one
+> problem: a farmer standing in front of a buyer has no way to know
+> whether the price on offer is actually fair."
 
 ## 0:08–0:25 — The problem
 **On screen:** Stay on the landing view, maybe scroll slowly down the left column.
 **Say:**
-> "Government mandi prices are usually a day late, and they describe an
-> entire district, not the specific buyer standing in front of a farmer
-> right now. So the same farmer can be quietly underpaid, again and again,
-> with no way to check."
+> "Government mandi prices arrive a day late and describe an entire
+> district, not the specific buyer standing in front of a specific farmer.
+> The same farmer can be quietly underpaid, season after season, with no
+> way to check."
 
 ## 0:25–0:45 — Reporting a sale, and real OCR
 **On screen:** Click into "Report a sale." Pick a crop. Click "Photograph
 price board," select a photo of any printed number (a price tag, a sticky
 note with a number on it works fine for the demo).
 **Say:**
-> "Farmers nearby report what they're selling — by voice, or just by
+> "Nearby farmers report what they're selling, by voice, or simply by
 > photographing a price board. That photo is read instantly by Tesseract,
-> a free, open-source OCR engine running entirely inside the browser. No
-> cloud call, no API key, no cost."
+> an open-source OCR engine running entirely inside the browser. No cloud
+> call, no API key, no cost."
 
 ## 0:45–1:05 — Fair Offer Check (the standout feature)
 **On screen:** Scroll to "Check a buyer's offer." Type a crop and a price.
 Click "Is this fair?" and let the colored verdict card render.
 **Say:**
-> "This is the feature I'm proudest of. Standing in front of a buyer, a
-> farmer types in the price being offered and gets an instant verdict,
-> compared against everyone nearby selling the same crop right now — in
-> English and in Tamil."
+> "This is the feature I'm proudest of: Fair Offer Check. Standing in
+> front of a buyer, a farmer enters the price being offered and gets an
+> instant verdict, benchmarked against everyone nearby selling the same
+> crop right now, in English and in Tamil."
 
 ## 1:05–1:25 — Map, recommendation, and a real price trend
 **On screen:** Pan to the map card, then the recommendation card. Point out
 the trend badge (rising/falling arrow).
 **Say:**
 > "The map plots every nearby report by real distance. And the
-> recommendation isn't just an average — that trend line is a live
+> recommendation isn't just an average, that trend line is a live
 > regression, computed on the spot, showing whether the price is rising or
-> falling, so a farmer knows which way tomorrow is heading, not just what
+> falling, so a farmer knows which way tomorrow is heading, not only what
 > today looks like."
 
 ## 1:25–1:40 — Sell Together nudge *(cuttable if running long)*
 **On screen:** Scroll to the "Sell together" card.
 **Say:**
-> "And when enough nearby farmers have the same crop in surplus, Ur Sandhai
-> suggests selling together — turning oversupply from a weakness into
-> shared bargaining power."
+> "And when enough nearby farmers are sitting on the same surplus crop,
+> Ur Sandhai surfaces a prompt to coordinate a shared sale, a small step
+> toward the bargaining power an organised cooperative already has."
 
 ## 1:40–1:55 — Honesty about the stack
 **On screen:** Slow pan across the whole page; optionally show the GitHub repo tab.
 **Say:**
-> "Everything you just saw — the geo-radius math, the fair-offer logic, the
-> regression, the OCR — is real, running live, for free, with no backend.
-> Voice input and read-aloud use the browser's own speech APIs, an honest
-> stand-in for what would be Amazon Transcribe and Polly in production."
+> "Everything you just saw, the geo-radius math, the fair-offer logic, the
+> regression, the OCR, is genuine, running live, for free, with no
+> backend. Voice input and read-aloud use the browser's own speech APIs,
+> an honest stand-in for Amazon Transcribe and Polly in production."
 
 ## 1:55–2:00 — Close
 **On screen:** Hold on the app title or a slide with the GitHub link and live demo URL.

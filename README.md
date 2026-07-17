@@ -1,93 +1,88 @@
-# Ur Sandhai — prototype
+# Ur Sandhai
 
-A working prototype for **Ur Sandhai** ("our marketplace"), a hyperlocal, crowd-sourced
-market intelligence app for smallholder farmers, built for the *AI for Bharat* hackathon
-(AgriTech track), submitted as an individual entry.
+A working prototype of **Ur Sandhai** ("our marketplace"), a hyperlocal,
+crowd-sourced market intelligence platform for smallholder farmers, built
+for the *AI for Bharat* hackathon, AgriTech track, submitted as an
+individual entry.
 
 **Live demo:** https://sruthisureshkumar-arch.github.io/ursandhai/
 **Write-up (tools, APIs, datasets):** [WRITEUP.md](./WRITEUP.md)
 
 ## What this is
 
-A single-file, self-contained web prototype (`index.html`) with a warm, editorial
-olive-and-cream interface — open it directly in a browser, no build step, no server
-required.
+A single-file, self-contained web prototype (`index.html`) with a warm,
+editorial interface in olive and cream. Open it directly in a browser:
+no build step, no server, no installation.
 
-**What's real:**
+**Operational right now:**
 - Haversine-based 10km geo-radius filtering of crowd-sourced reports
-- Time-bucketed price analysis to surface the best-selling window of the day
-- Crop priority scoring (price level, demand signal, local supply pressure)
-- Automatic fallback to a government (Agmarknet-style) baseline price when local
-  crowd data is too sparse
-- A live SVG map plotting real bearing/distance from the farmer's location
-- Bilingual (English + Tamil) recommendation output
-- **Fair Offer Check** — compares a buyer's offered price to the live local average
-- **Sell Together nudge** — flags real oversupply and suggests coordinating a sale
-- **Live price trend** — a real linear-regression model run on crowd reports
-- **Price-board OCR** — Tesseract.js reads a photographed price board in-browser
+- Time-bucketed price analysis surfacing the strongest-selling window of the day
+- Crop priority scoring across price level, demand signal, and local supply pressure
+- Automatic fallback to a government-style (Agmarknet) baseline price when local
+  crowd data is too sparse to trust
+- A live SVG map plotting real bearing and distance from the farmer's location
+- Bilingual (English and Tamil) recommendation output
+- **Fair Offer Check** — benchmarks a buyer's offered price against the live local average
+- **Sell Together** — detects real oversupply nearby and prompts coordinated selling
+- **Live price trend** — a genuine linear-regression model computed on crowd reports
+- **Price-board OCR** — Tesseract.js reads a photographed price board client-side
 - Reports persist to `localStorage`, so a demo session survives a page refresh, with a
-  one-click reset back to seeded sample data
-- A CSS breakpoint stacks the layout to a single column under 760px, since the actual
-  users of something like this would be on a phone, not a desktop — implemented with a
-  standard media query, but worth a quick check on a real phone before you demo it, since
-  it hasn't been screenshot-verified on an actual device
+  one-click reset to the seeded sample data
+- A CSS breakpoint collapses the layout to a single column under 760px, built for the
+  reality that the intended users are on phones, not desktops (implemented with a
+  standard media query; worth a quick check on an actual device before you demo it,
+  since it hasn't been screenshot-verified there)
 
-**What's currently stood in for** (clearly labeled in the UI), pending an AWS account:
-- Voice capture uses the browser's free Web Speech API instead of Amazon Transcribe + Comprehend
-- "Read aloud" uses the browser's free speech synthesis instead of Amazon Polly
-- The price trend is an OLS regression instead of a trained Prophet/scikit-learn model
-- Crop identification from a photo (as opposed to reading a price board) is not yet built
+**Simulated for this round** (clearly labeled in the interface), pending an AWS account:
+- Voice capture uses the browser's free Web Speech API in place of Amazon Transcribe and Comprehend
+- Read-aloud uses the browser's free speech synthesis in place of Amazon Polly
+- The price trend is an OLS regression standing in for a trained Prophet/scikit-learn model
+- Crop identification from a photo, distinct from reading a price board, which now works,
+  is not yet built
 
-See [WRITEUP.md](./WRITEUP.md) for the full breakdown of what's real versus mocked and
-the intended production architecture (Transcribe, Comprehend, Rekognition, Textract,
-Polly, Prophet + scikit-learn, Agmarknet via data.gov.in).
+See [WRITEUP.md](./WRITEUP.md) for the complete breakdown of what's operational versus
+simulated, and the intended production architecture: Transcribe, Comprehend, Rekognition,
+Textract, Polly, Prophet, scikit-learn, and Agmarknet via data.gov.in.
 
-## Feasibility and cost safety
+## Feasibility and cost discipline
 
-Everything here runs on free tiers with no bill attached: GitHub Pages, free CDN fonts
-and libraries, and browser-native speech APIs. The production plan keeps that discipline
-going, AWS credentials never touch the client, every AI call runs server-side behind
-auth and rate limits, IAM is scoped per service, and a budget alarm cuts access if
-spending moves past zero. See [WRITEUP.md](./WRITEUP.md) for the rollout plan and the
-social impact case.
+Every component here runs on a free tier with no bill attached: GitHub Pages, free CDN
+delivery for fonts and libraries, browser-native speech APIs. The production plan carries
+that discipline forward rather than abandoning it: AWS credentials never touch the
+client, every AI call runs server-side behind authentication and rate limits, IAM is
+scoped per service, and a budget alarm cuts access the moment spending moves past zero.
+See [WRITEUP.md](./WRITEUP.md) for the rollout plan and the social impact case.
 
 ## Running it
 
 Open the [live demo](https://sruthisureshkumar-arch.github.io/ursandhai/), or clone the
-repo and open `index.html` directly in Chrome. Voice input and Tamil text-to-speech need
-microphone permission and work best when opened as a real page (not embedded in an
-iframe).
+repository and open `index.html` directly in Chrome. Voice input and Tamil text-to-speech
+require microphone permission and work best as a real page rather than an embedded iframe.
 
 ## Roadmap
 
-- Wire in real AWS calls (Transcribe, Rekognition, Textract, Polly) behind the same
-  interfaces this prototype already uses
+- Wire in real AWS calls (Transcribe, Rekognition, Textract, Polly) behind the interfaces
+  this prototype already exposes
 - Add the buyer-reputation Google Maps link
-- Move recommendation scoring to a proper backend with persistent storage (Supabase/Postgres)
-- Swap the simple time-bucket average for a Prophet/scikit-learn forecasting model
+- Move recommendation scoring to a backend with persistent storage (Supabase/Postgres)
+- Replace the time-bucket average with a Prophet/scikit-learn forecasting model
+- Give farmers a way to actually contact each other through the Sell Together nudge
 
-## What's novel here
+## What sets this apart
 
-Most crowd-price apps stop at "here's today's average." Ur Sandhai adds three
-mechanics built specifically for the moment a farmer is deciding whether to
-sell:
+Most crowd-price tools stop at reporting today's average. Ur Sandhai adds three
+mechanics built for the exact moment a farmer decides whether to sell:
 
-- **Fair Offer Check** — standing in front of a buyer, a farmer types in the
-  price being offered and gets an instant, plain-language verdict against the
-  live local average (or the government baseline if there isn't enough local
-  data yet), in English and Tamil. This answers the literal problem the
-  project opened with: not knowing whether an offer is fair.
-- **Sell Together nudge** — when enough nearby farmers are reporting the same
-  crop in real volume, the app surfaces a suggestion to coordinate a shared
-  sale instead of each farmer selling piecemeal into a saturated local
-  market. Computed live from the same crowd reports, not a static tip.
-- **Live price trend** — a real ordinary-least-squares regression run in the
-  browser on whatever crowd reports currently exist, showing whether a crop's
-  local price is rising, falling, or steady. It's a lightweight stand-in for
-  the Prophet model planned for production, but the math is genuine and
-  running on live data.
+- **Fair Offer Check** puts the project's founding problem directly in a farmer's hands:
+  standing in front of a buyer, they enter the price on offer and get an instant,
+  bilingual verdict against the live local average.
+- **Sell Together** watches for genuine oversupply among nearby crowd reports and
+  surfaces a prompt to coordinate a shared sale, turning a penalty the scoring model
+  already computes into something actionable, though it remains a prompt rather than a
+  coordination tool: it doesn't yet connect farmers to one another directly.
+- **Live price trend** is a real ordinary-least-squares regression, run in the browser
+  against whatever crowd reports currently exist, rather than a static number.
 
-Photo price-board reading is also real now: it runs on
-[Tesseract.js](https://github.com/naptha/tesseract.js), a free, open-source
-OCR engine, entirely in the browser. No AWS account or API key required for
-any of the above.
+Price-board reading is also genuine: it runs on
+[Tesseract.js](https://github.com/naptha/tesseract.js), an open-source OCR engine,
+entirely in the browser. No AWS account or API key required for any of the above.
