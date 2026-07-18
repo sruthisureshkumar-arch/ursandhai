@@ -150,13 +150,16 @@ a{color:inherit;text-decoration:none;}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ---------- blooming flower widget ---------- */
+/* ---------- blooming flower clusters, fixed to the page corners ---------- */
 .flower-widget{
-  position:absolute;top:-40px;width:132px;height:132px;z-index:15;cursor:pointer;
+  position:fixed;bottom:-90px;width:220px;height:300px;z-index:6;cursor:pointer;pointer-events:auto;
 }
-.flower-widget.left{left:24px;}
-.flower-widget.right{right:24px;}
-.flower-svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 8px 18px rgba(36,42,27,0.2));}
+.flower-widget.left{left:-30px;}
+.flower-widget.right{right:-30px;transform:scaleX(-1);}
+@media (max-width:700px){
+  .flower-widget{width:130px;height:180px;bottom:-50px;}
+}
+.flower-svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 10px 22px rgba(36,42,27,0.22));}
 .flower-svg .petal{
   transform-box:fill-box;transform-origin:center;
   transform:rotate(calc(var(--i) * 60deg)) translateY(6px) scale(0.32);
@@ -231,6 +234,90 @@ a{color:inherit;text-decoration:none;}
 <div id="boot-fade"></div>
 <div id="particles"></div>
 
+<div class="flower-widget left flower-hover" title="Hover to bloom">
+  <svg class="flower-svg" viewBox="0 0 220 300">
+    <defs>
+      <linearGradient id="petalGradL" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fbdce6"/>
+        <stop offset="100%" stop-color="#e685a4"/>
+      </linearGradient>
+    </defs>
+    <ellipse class="leaf" cx="90" cy="272" rx="16" ry="6" fill="#6f8a4c" transform="rotate(-30 90 272)"/>
+    <ellipse class="leaf" cx="145" cy="262" rx="16" ry="6" fill="#7d9a55" transform="rotate(35 145 262)"/>
+    <ellipse class="leaf" cx="40" cy="192" rx="11" ry="5" fill="#7d9a55" transform="rotate(-55 40 192)"/>
+    <ellipse class="leaf" cx="78" cy="185" rx="11" ry="5" fill="#8ba862" transform="rotate(15 78 185)"/>
+    <!-- large bloom -->
+    <g style="--i:0"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:1"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:2"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:3"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:4"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:5"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g class="stamen">
+      <circle cx="115" cy="235" r="9" fill="#f0c85e"/>
+      <circle cx="109" cy="232" r="1.6" fill="#c9922e"/>
+      <circle cx="121" cy="232" r="1.6" fill="#c9922e"/>
+      <circle cx="115" cy="239" r="1.6" fill="#c9922e"/>
+      <circle cx="107" cy="238" r="1.3" fill="#c9922e"/>
+      <circle cx="123" cy="238" r="1.3" fill="#c9922e"/>
+    </g>
+    <!-- small bloom -->
+    <g style="--i:0"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:1"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:2"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:3"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:4"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:5"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g class="stamen">
+      <circle cx="55" cy="140" r="5.5" fill="#f0c85e"/>
+      <circle cx="51" cy="138" r="1" fill="#c9922e"/>
+      <circle cx="59" cy="138" r="1" fill="#c9922e"/>
+      <circle cx="55" cy="143" r="1" fill="#c9922e"/>
+    </g>
+  </svg>
+</div>
+
+<div class="flower-widget right flower-hover" title="Hover to bloom">
+  <svg class="flower-svg" viewBox="0 0 220 300">
+    <defs>
+      <linearGradient id="petalGradR" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fbdce6"/>
+        <stop offset="100%" stop-color="#e685a4"/>
+      </linearGradient>
+    </defs>
+    <ellipse class="leaf" cx="90" cy="272" rx="16" ry="6" fill="#6f8a4c" transform="rotate(-30 90 272)"/>
+    <ellipse class="leaf" cx="145" cy="262" rx="16" ry="6" fill="#7d9a55" transform="rotate(35 145 262)"/>
+    <ellipse class="leaf" cx="40" cy="192" rx="11" ry="5" fill="#7d9a55" transform="rotate(-55 40 192)"/>
+    <ellipse class="leaf" cx="78" cy="185" rx="11" ry="5" fill="#8ba862" transform="rotate(15 78 185)"/>
+    <g style="--i:0"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:1"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:2"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:3"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:4"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g style="--i:5"><ellipse class="petal" cx="115" cy="212" rx="15" ry="24" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.7"/></g>
+    <g class="stamen">
+      <circle cx="115" cy="235" r="9" fill="#f0c85e"/>
+      <circle cx="109" cy="232" r="1.6" fill="#c9922e"/>
+      <circle cx="121" cy="232" r="1.6" fill="#c9922e"/>
+      <circle cx="115" cy="239" r="1.6" fill="#c9922e"/>
+      <circle cx="107" cy="238" r="1.3" fill="#c9922e"/>
+      <circle cx="123" cy="238" r="1.3" fill="#c9922e"/>
+    </g>
+    <g style="--i:0"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:1"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:2"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:3"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:4"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g style="--i:5"><ellipse class="petal" cx="55" cy="126" rx="10" ry="15" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+    <g class="stamen">
+      <circle cx="55" cy="140" r="5.5" fill="#f0c85e"/>
+      <circle cx="51" cy="138" r="1" fill="#c9922e"/>
+      <circle cx="59" cy="138" r="1" fill="#c9922e"/>
+      <circle cx="55" cy="143" r="1" fill="#c9922e"/>
+    </g>
+  </svg>
+</div>
+
 <nav class="nav" id="nav">
   <div class="logo"><span class="mark">US</span>Ur Sandhai</div>
   <div class="nav-center">
@@ -267,58 +354,6 @@ a{color:inherit;text-decoration:none;}
     <div class="rays"></div>
     <div class="fog"></div>
     <div class="grain"></div>
-  </div>
-  <div class="flower-widget left flower-hover" title="Hover to bloom">
-    <svg class="flower-svg" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="petalGradL" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#fbdce6"/>
-          <stop offset="100%" stop-color="#e685a4"/>
-        </linearGradient>
-      </defs>
-      <ellipse class="leaf" cx="34" cy="66" rx="9" ry="4" fill="#6f8a4c" transform="rotate(-40 34 66)"/>
-      <ellipse class="leaf" cx="66" cy="66" rx="9" ry="4" fill="#7d9a55" transform="rotate(40 66 66)"/>
-      <g style="--i:0"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:1"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:2"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:3"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:4"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:5"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g class="stamen">
-        <circle cx="50" cy="50" r="6.5" fill="#f0c85e"/>
-        <circle cx="46" cy="48" r="1.2" fill="#c9922e"/>
-        <circle cx="54" cy="48" r="1.2" fill="#c9922e"/>
-        <circle cx="50" cy="53" r="1.2" fill="#c9922e"/>
-        <circle cx="45" cy="52" r="1" fill="#c9922e"/>
-        <circle cx="55" cy="52" r="1" fill="#c9922e"/>
-      </g>
-    </svg>
-  </div>
-  <div class="flower-widget right flower-hover" title="Hover to bloom">
-    <svg class="flower-svg" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="petalGradR" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#fbdce6"/>
-          <stop offset="100%" stop-color="#e685a4"/>
-        </linearGradient>
-      </defs>
-      <ellipse class="leaf" cx="34" cy="66" rx="9" ry="4" fill="#6f8a4c" transform="rotate(-40 34 66)"/>
-      <ellipse class="leaf" cx="66" cy="66" rx="9" ry="4" fill="#7d9a55" transform="rotate(40 66 66)"/>
-      <g style="--i:0"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:1"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:2"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:3"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:4"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:5"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g class="stamen">
-        <circle cx="50" cy="50" r="6.5" fill="#f0c85e"/>
-        <circle cx="46" cy="48" r="1.2" fill="#c9922e"/>
-        <circle cx="54" cy="48" r="1.2" fill="#c9922e"/>
-        <circle cx="50" cy="53" r="1.2" fill="#c9922e"/>
-        <circle cx="45" cy="52" r="1" fill="#c9922e"/>
-        <circle cx="55" cy="52" r="1" fill="#c9922e"/>
-      </g>
-    </svg>
   </div>
 </div>
 <p class="caption" data-i18n="caption">Real reports, real neighbours, real time.</p>
