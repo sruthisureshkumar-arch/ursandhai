@@ -32,6 +32,9 @@
   .brand .name{font-family:var(--serif);font-style:italic;font-weight:600;font-size:19px;color:var(--olive-dark);}
   .brand .sub{font-size:12px;color:var(--sub);}
   .track-badge{font-size:12px;font-weight:600;color:var(--olive-dark);background:var(--cream);padding:6px 12px;border-radius:20px;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .home-link{font-size:13px;font-weight:600;color:var(--olive-dark);text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:20px;transition:background 150ms ease;}
+  .home-link:hover{background:var(--cream);}
   #us-root .tag{font-size:14px;color:var(--sub);line-height:1.6;margin:0 0 24px;max-width:680px;}
   #us-root .grid{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;}
   #us-root .card{
@@ -130,7 +133,10 @@
 <div class="mark">US</div>
 <div><div class="name">Ur Sandhai</div><div class="sub">working prototype</div></div>
 </div>
+<div class="topbar-right">
+<a class="home-link" href="landing.html">&larr; Home</a>
 <div class="track-badge">AgriTech</div>
+</div>
 </div>
 <div class="tag">Hyperlocal price intelligence for smallholder farmers: geo-radius filtering, live regression-based price trends, and client-side OCR, all running in your browser with no backend. Open this file in Chrome for microphone, speech, and camera features.</div>
 <div class="grid">
