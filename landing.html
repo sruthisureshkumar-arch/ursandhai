@@ -152,9 +152,11 @@ a{color:inherit;text-decoration:none;}
 
 /* ---------- blooming flower widget ---------- */
 .flower-widget{
-  position:absolute;top:-22px;right:38px;width:76px;height:76px;z-index:15;cursor:pointer;
+  position:absolute;top:-40px;width:132px;height:132px;z-index:15;cursor:pointer;
 }
-.flower-svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 14px rgba(36,42,27,0.18));}
+.flower-widget.left{left:24px;}
+.flower-widget.right{right:24px;}
+.flower-svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 8px 18px rgba(36,42,27,0.2));}
 .flower-svg .petal{
   transform-box:fill-box;transform-origin:center;
   transform:rotate(calc(var(--i) * 60deg)) translateY(6px) scale(0.32);
@@ -170,14 +172,15 @@ a{color:inherit;text-decoration:none;}
 .flower-svg .leaf{opacity:0.85;}
 
 .falling-petal{
-  position:fixed;width:8px;height:11px;border-radius:50% 0 50% 50%;
+  position:fixed;top:-24px;width:11px;height:15px;border-radius:50% 0 50% 50%;
   background:linear-gradient(135deg,#f7cbd8,#e685a4);
   pointer-events:none;z-index:999;opacity:0.95;
-  animation-name:petalFall;animation-timing-function:ease-in;animation-fill-mode:forwards;
+  animation-name:petalFall;animation-timing-function:cubic-bezier(0.4,0.1,0.6,0.9);animation-fill-mode:forwards;
 }
 @keyframes petalFall{
   0%{transform:translate(0,0) rotate(0deg);opacity:0.95;}
-  100%{transform:translate(var(--dx),170px) rotate(var(--rot));opacity:0;}
+  85%{opacity:0.85;}
+  100%{transform:translate(var(--dx),105vh) rotate(var(--rot));opacity:0;}
 }
 .caption{text-align:center;font-size:13.5px;color:var(--sub);margin:22px 0 14px;opacity:0;animation:fadeUp 700ms var(--spring) 1900ms forwards;}
 .trust-row{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;padding-bottom:70px;opacity:0;animation:fadeUp 700ms var(--spring) 2050ms forwards;}
@@ -265,22 +268,48 @@ a{color:inherit;text-decoration:none;}
     <div class="fog"></div>
     <div class="grain"></div>
   </div>
-  <div class="flower-widget" id="flowerWidget" title="Hover to bloom">
+  <div class="flower-widget left flower-hover" title="Hover to bloom">
     <svg class="flower-svg" viewBox="0 0 100 100">
       <defs>
-        <linearGradient id="petalGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="petalGradL" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#fbdce6"/>
           <stop offset="100%" stop-color="#e685a4"/>
         </linearGradient>
       </defs>
       <ellipse class="leaf" cx="34" cy="66" rx="9" ry="4" fill="#6f8a4c" transform="rotate(-40 34 66)"/>
       <ellipse class="leaf" cx="66" cy="66" rx="9" ry="4" fill="#7d9a55" transform="rotate(40 66 66)"/>
-      <g style="--i:0"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:1"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:2"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:3"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:4"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
-      <g style="--i:5"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:0"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:1"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:2"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:3"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:4"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:5"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradL)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g class="stamen">
+        <circle cx="50" cy="50" r="6.5" fill="#f0c85e"/>
+        <circle cx="46" cy="48" r="1.2" fill="#c9922e"/>
+        <circle cx="54" cy="48" r="1.2" fill="#c9922e"/>
+        <circle cx="50" cy="53" r="1.2" fill="#c9922e"/>
+        <circle cx="45" cy="52" r="1" fill="#c9922e"/>
+        <circle cx="55" cy="52" r="1" fill="#c9922e"/>
+      </g>
+    </svg>
+  </div>
+  <div class="flower-widget right flower-hover" title="Hover to bloom">
+    <svg class="flower-svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="petalGradR" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fbdce6"/>
+          <stop offset="100%" stop-color="#e685a4"/>
+        </linearGradient>
+      </defs>
+      <ellipse class="leaf" cx="34" cy="66" rx="9" ry="4" fill="#6f8a4c" transform="rotate(-40 34 66)"/>
+      <ellipse class="leaf" cx="66" cy="66" rx="9" ry="4" fill="#7d9a55" transform="rotate(40 66 66)"/>
+      <g style="--i:0"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:1"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:2"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:3"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:4"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:5"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGradR)" stroke="#d8698f" stroke-width="0.6"/></g>
       <g class="stamen">
         <circle cx="50" cy="50" r="6.5" fill="#f0c85e"/>
         <circle cx="46" cy="48" r="1.2" fill="#c9922e"/>
@@ -436,38 +465,40 @@ a{color:inherit;text-decoration:none;}
     field.appendChild(p);
   }
 
-  // blooming flower: spawns real falling petal elements on hover
-  var flower = document.getElementById('flowerWidget');
+  // blooming flowers: spawn real falling petal elements raining from the
+  // top of the page while either flower is hovered
+  var flowers = document.querySelectorAll('.flower-hover');
   var petalTimer = null;
   function spawnPetals(){
-    var rect = flower.getBoundingClientRect();
-    var count = 10;
+    var count = 14;
     for (var i = 0; i < count; i++){
       (function(){
         var pet = document.createElement('div');
         pet.className = 'falling-petal';
-        var startX = rect.left + rect.width * 0.5 + (Math.random() * 26 - 13);
-        var startY = rect.top + rect.height * 0.4;
+        var startX = Math.random() * window.innerWidth;
         pet.style.left = startX + 'px';
-        pet.style.top = startY + 'px';
-        pet.style.setProperty('--dx', (Math.random() * 130 - 65) + 'px');
+        pet.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px');
         pet.style.setProperty('--rot', (Math.random() * 360) + 'deg');
-        pet.style.animationDuration = (1600 + Math.random() * 1400) + 'ms';
-        pet.style.animationDelay = (Math.random() * 350) + 'ms';
+        pet.style.animationDuration = (3200 + Math.random() * 2200) + 'ms';
+        pet.style.animationDelay = (Math.random() * 600) + 'ms';
         document.body.appendChild(pet);
         pet.addEventListener('animationend', function(){ pet.remove(); });
       })();
     }
   }
-  if (flower){
+  flowers.forEach(function(flower){
     flower.addEventListener('mouseenter', function(){
       spawnPetals();
-      petalTimer = setInterval(spawnPetals, 1400);
+      if (!petalTimer) petalTimer = setInterval(spawnPetals, 900);
     });
     flower.addEventListener('mouseleave', function(){
-      if (petalTimer) clearInterval(petalTimer);
+      // only stop once no flower is still hovered
+      setTimeout(function(){
+        var anyHover = Array.prototype.some.call(flowers, function(f){ return f.matches(':hover'); });
+        if (!anyHover && petalTimer){ clearInterval(petalTimer); petalTimer = null; }
+      }, 30);
     });
-  }
+  });
 
   // nav opacity on scroll
   var nav = document.getElementById('nav');
