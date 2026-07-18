@@ -119,26 +119,26 @@ a{color:inherit;text-decoration:none;}
     linear-gradient(180deg, rgba(255,250,235,0.05) 0%, rgba(20,26,12,0.28) 85%),
     linear-gradient(120deg, #3c4d28 0%, #5c6a37 30%, #8a9752 55%, #b7c078 75%, #dbe0b6 100%);
   background-size:cover;background-position:center 30%;background-repeat:no-repeat;
-  filter:saturate(1.12) contrast(1.04) brightness(1.03) blur(0.35px);
-  box-shadow:0 40px 90px rgba(36,42,27,0.22), 0 0 90px rgba(233,194,127,0.22), inset 0 0 60px rgba(255,244,214,0.08);
-  -webkit-mask-image:linear-gradient(to bottom, black 80%, transparent 99%);
-  mask-image:linear-gradient(to bottom, black 80%, transparent 99%);
+  filter:saturate(1.06) contrast(1.03);
+  box-shadow:0 40px 90px rgba(36,42,27,0.22), 0 0 60px rgba(233,194,127,0.14);
+  -webkit-mask-image:linear-gradient(to bottom, black 84%, transparent 99%);
+  mask-image:linear-gradient(to bottom, black 84%, transparent 99%);
   animation:landscapeZoom 24s ease-in-out infinite alternate;
 }
 @keyframes landscapeZoom{0%{background-size:cover,cover,cover,cover;transform:scale(1);}100%{transform:scale(1.035);}}
 .landscape .bloom{
   position:absolute;inset:-12%;
   background-image:inherit;background-size:cover;background-position:inherit;background-repeat:no-repeat;
-  filter:blur(34px) brightness(1.4) saturate(1.3);
-  mix-blend-mode:screen;opacity:0.5;transform:scale(1.04);
+  filter:blur(16px) brightness(1.1) saturate(1.1);
+  mix-blend-mode:screen;opacity:0.16;transform:scale(1.02);
   pointer-events:none;
 }
 .landscape .rays{
   position:absolute;inset:-20% -20% 0 -20%;
-  background:conic-gradient(from 210deg at 50% 0%, transparent 0deg, rgba(255,244,214,0.34) 8deg, transparent 18deg, transparent 46deg, rgba(255,244,214,0.24) 56deg, transparent 68deg);
+  background:conic-gradient(from 210deg at 50% 0%, transparent 0deg, rgba(255,244,214,0.22) 8deg, transparent 18deg, transparent 46deg, rgba(255,244,214,0.15) 56deg, transparent 68deg);
   mix-blend-mode:soft-light;animation:raysShimmer 12s ease-in-out infinite;pointer-events:none;
 }
-@keyframes raysShimmer{0%,100%{opacity:0.6;}50%{opacity:1;}}
+@keyframes raysShimmer{0%,100%{opacity:0.5;}50%{opacity:0.85;}}
 .landscape .fog{
   position:absolute;left:-15%;width:130%;height:38%;bottom:0;
   background:linear-gradient(90deg, transparent, rgba(250,246,232,0.34) 40%, rgba(250,246,232,0.38) 55%, transparent);
@@ -148,6 +148,36 @@ a{color:inherit;text-decoration:none;}
 .landscape .grain{
   position:absolute;inset:0;pointer-events:none;opacity:0.05;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- blooming flower widget ---------- */
+.flower-widget{
+  position:absolute;top:-22px;right:38px;width:76px;height:76px;z-index:15;cursor:pointer;
+}
+.flower-svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 14px rgba(36,42,27,0.18));}
+.flower-svg .petal{
+  transform-box:fill-box;transform-origin:center;
+  transform:rotate(calc(var(--i) * 60deg)) translateY(6px) scale(0.32);
+  opacity:0.75;
+  transition:transform 700ms var(--spring), opacity 700ms var(--spring);
+}
+.flower-widget:hover .flower-svg .petal{
+  transform:rotate(calc(var(--i) * 60deg)) translateY(-4px) scale(1);
+  opacity:1;
+}
+.flower-svg .stamen{transition:transform 700ms var(--spring) 120ms,opacity 700ms var(--spring) 120ms;transform:scale(0.5);opacity:0.6;transform-box:fill-box;transform-origin:center;}
+.flower-widget:hover .flower-svg .stamen{transform:scale(1);opacity:1;}
+.flower-svg .leaf{opacity:0.85;}
+
+.falling-petal{
+  position:fixed;width:8px;height:11px;border-radius:50% 0 50% 50%;
+  background:linear-gradient(135deg,#f7cbd8,#e685a4);
+  pointer-events:none;z-index:999;opacity:0.95;
+  animation-name:petalFall;animation-timing-function:ease-in;animation-fill-mode:forwards;
+}
+@keyframes petalFall{
+  0%{transform:translate(0,0) rotate(0deg);opacity:0.95;}
+  100%{transform:translate(var(--dx),170px) rotate(var(--rot));opacity:0;}
 }
 .caption{text-align:center;font-size:13.5px;color:var(--sub);margin:22px 0 14px;opacity:0;animation:fadeUp 700ms var(--spring) 1900ms forwards;}
 .trust-row{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;padding-bottom:70px;opacity:0;animation:fadeUp 700ms var(--spring) 2050ms forwards;}
@@ -234,6 +264,32 @@ a{color:inherit;text-decoration:none;}
     <div class="rays"></div>
     <div class="fog"></div>
     <div class="grain"></div>
+  </div>
+  <div class="flower-widget" id="flowerWidget" title="Hover to bloom">
+    <svg class="flower-svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="petalGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fbdce6"/>
+          <stop offset="100%" stop-color="#e685a4"/>
+        </linearGradient>
+      </defs>
+      <ellipse class="leaf" cx="34" cy="66" rx="9" ry="4" fill="#6f8a4c" transform="rotate(-40 34 66)"/>
+      <ellipse class="leaf" cx="66" cy="66" rx="9" ry="4" fill="#7d9a55" transform="rotate(40 66 66)"/>
+      <g style="--i:0"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:1"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:2"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:3"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:4"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g style="--i:5"><ellipse class="petal" cx="50" cy="34" rx="11" ry="17" fill="url(#petalGrad)" stroke="#d8698f" stroke-width="0.6"/></g>
+      <g class="stamen">
+        <circle cx="50" cy="50" r="6.5" fill="#f0c85e"/>
+        <circle cx="46" cy="48" r="1.2" fill="#c9922e"/>
+        <circle cx="54" cy="48" r="1.2" fill="#c9922e"/>
+        <circle cx="50" cy="53" r="1.2" fill="#c9922e"/>
+        <circle cx="45" cy="52" r="1" fill="#c9922e"/>
+        <circle cx="55" cy="52" r="1" fill="#c9922e"/>
+      </g>
+    </svg>
   </div>
 </div>
 <p class="caption" data-i18n="caption">Real reports, real neighbours, real time.</p>
@@ -378,6 +434,39 @@ a{color:inherit;text-decoration:none;}
     p.style.animationDelay = (-Math.random() * duration) + 's';
     p.style.setProperty('--drift', (Math.random() * 70 - 35) + 'px');
     field.appendChild(p);
+  }
+
+  // blooming flower: spawns real falling petal elements on hover
+  var flower = document.getElementById('flowerWidget');
+  var petalTimer = null;
+  function spawnPetals(){
+    var rect = flower.getBoundingClientRect();
+    var count = 10;
+    for (var i = 0; i < count; i++){
+      (function(){
+        var pet = document.createElement('div');
+        pet.className = 'falling-petal';
+        var startX = rect.left + rect.width * 0.5 + (Math.random() * 26 - 13);
+        var startY = rect.top + rect.height * 0.4;
+        pet.style.left = startX + 'px';
+        pet.style.top = startY + 'px';
+        pet.style.setProperty('--dx', (Math.random() * 130 - 65) + 'px');
+        pet.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+        pet.style.animationDuration = (1600 + Math.random() * 1400) + 'ms';
+        pet.style.animationDelay = (Math.random() * 350) + 'ms';
+        document.body.appendChild(pet);
+        pet.addEventListener('animationend', function(){ pet.remove(); });
+      })();
+    }
+  }
+  if (flower){
+    flower.addEventListener('mouseenter', function(){
+      spawnPetals();
+      petalTimer = setInterval(spawnPetals, 1400);
+    });
+    flower.addEventListener('mouseleave', function(){
+      if (petalTimer) clearInterval(petalTimer);
+    });
   }
 
   // nav opacity on scroll
