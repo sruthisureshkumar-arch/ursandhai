@@ -69,6 +69,12 @@ a{color:inherit;text-decoration:none;}
 .nav-right{display:flex;align-items:center;gap:16px;}
 .nav-right .signin{font-size:13.5px;font-weight:500;color:var(--sub);transition:color 250ms;}
 .nav-right .signin:hover{color:var(--ink);}
+.lang-toggle{
+  display:flex;align-items:center;gap:2px;padding:3px;border-radius:999px;
+  background:rgba(51,61,32,0.07);border:1px solid var(--border);cursor:pointer;
+}
+.lang-toggle .opt{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:var(--sub);transition:all 280ms var(--spring);}
+.lang-toggle .opt.active{background:var(--olive-dark);color:var(--bg);}
 .btn{
   position:relative;padding:12px 22px;border-radius:999px;font-size:13.5px;font-weight:600;
   border:1px solid transparent;cursor:pointer;transition:transform 320ms var(--spring), box-shadow 320ms var(--spring), background 320ms var(--spring);
@@ -181,27 +187,30 @@ a{color:inherit;text-decoration:none;}
 <nav class="nav" id="nav">
   <div class="logo"><span class="mark">US</span>Ur Sandhai</div>
   <div class="nav-center">
-    <a href="#top">Home</a>
-    <a href="#problem">Problem</a>
-    <a href="#features">Features</a>
-    <a href="index.html">Demo</a>
+    <a href="#top" data-i18n="navHome">Home</a>
+    <a href="#problem" data-i18n="navProblem">Problem</a>
+    <a href="#features" data-i18n="navFeatures">Features</a>
+    <a href="index.html" data-i18n="navDemo">Demo</a>
   </div>
   <div class="nav-right">
-    <a class="signin" href="mailto:sruthisureshkumar@gmail.com">Contact</a>
-    <a class="btn btn-dark" href="index.html"><span class="sweep"></span>Try the demo →</a>
+    <button class="lang-toggle" id="langToggle" type="button" aria-label="Switch language">
+      <span class="opt active" data-lang="en">EN</span><span class="opt" data-lang="ta">தமிழ்</span>
+    </button>
+    <a class="signin" href="mailto:sruthisureshkumar@gmail.com" data-i18n="navContact">Contact</a>
+    <a class="btn btn-dark" href="index.html"><span class="sweep"></span><span data-i18n="navCta">Try the demo →</span></a>
   </div>
 </nav>
 
 <section class="hero" id="top">
-  <div class="eyebrow"><span class="d"></span>AI for Bharat · AgriTech<span class="d"></span></div>
+  <div class="eyebrow"><span class="d"></span><span data-i18n="eyebrow">AI for Bharat · AgriTech</span><span class="d"></span></div>
   <h1 id="heroHeading">
-    <span class="line1">See the Market Clearly,</span>
-    <span class="accent" id="heroAccent">Village by Village.</span>
+    <span class="line1" data-i18n="heroLine1">See the Market Clearly,</span>
+    <span class="accent" id="heroAccent" data-i18n="heroAccent">Village by Village.</span>
   </h1>
-  <p class="hero-sub">Hyperlocal prices and fair offers, gathered by the farmers who grow the harvest, delivered in Tamil and English, the moment it matters.</p>
+  <p class="hero-sub" data-i18n="heroSub">Hyperlocal prices and fair offers, gathered by the farmers who grow the harvest, delivered in Tamil and English, the moment it matters.</p>
   <div class="cta-row">
-    <a class="btn btn-dark" href="index.html"><span class="sweep"></span>Try the Demo →</a>
-    <a class="btn btn-outline" href="#features"><span class="sweep"></span>◎ How It Works</a>
+    <a class="btn btn-dark" href="index.html"><span class="sweep"></span><span data-i18n="ctaTry">Try the Demo →</span></a>
+    <a class="btn btn-outline" href="#features"><span class="sweep"></span><span data-i18n="ctaHow">◎ How It Works</span></a>
   </div>
 </section>
 
@@ -211,40 +220,40 @@ a{color:inherit;text-decoration:none;}
     <div class="fog"></div>
   </div>
 </div>
-<p class="caption">Real reports, real neighbours, real time.</p>
+<p class="caption" data-i18n="caption">Real reports, real neighbours, real time.</p>
 <div class="trust-row">
   <span>AI for Bharat 2026</span>
   <span>AgriTech Track</span>
   <span>Individual Entry</span>
-  <span>Open Source on GitHub</span>
+  <span data-i18n="sourceLink">Open Source on GitHub</span>
 </div>
 
 <section class="section" id="problem">
   <div class="reveal">
-    <h2>An offer only a neighbour can verify</h2>
-    <p class="lead">A farmer standing in front of a buyer rarely knows whether the price on the table is fair. Government mandi prices arrive a day late and describe an entire district, not the specific village, the specific hour, or the specific buyer standing in front of them right now. Ur Sandhai closes that gap with the people already closest to it: nearby farmers, reporting in real time.</p>
+    <h2 data-i18n="problemH2">An offer only a neighbour can verify</h2>
+    <p class="lead" data-i18n="problemLead">A farmer standing in front of a buyer rarely knows whether the price on the table is fair. Government mandi prices arrive a day late and describe an entire district, not the specific village, the specific hour, or the specific buyer standing in front of them right now. Ur Sandhai closes that gap with the people already closest to it: nearby farmers, reporting in real time.</p>
   </div>
 </section>
 
 <section class="section" id="features">
   <div class="reveal">
-    <h2>Built for the moment of the sale</h2>
-    <p class="lead">Three mechanics, all running live in the working prototype, aimed at the instant a farmer decides whether to sell.</p>
+    <h2 data-i18n="featuresH2">Built for the moment of the sale</h2>
+    <p class="lead" data-i18n="featuresLead">Three mechanics, all running live in the working prototype, aimed at the instant a farmer decides whether to sell.</p>
     <div class="feature-grid">
       <div class="feature">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2a2410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-        <h3>Fair Offer Check</h3>
-        <p>Enter the price a buyer just offered and get an instant, bilingual verdict against the live local average.</p>
+        <h3 data-i18n="f1Title">Fair Offer Check</h3>
+        <p data-i18n="f1Desc">Enter the price a buyer just offered and get an instant, bilingual verdict against the live local average.</p>
       </div>
       <div class="feature">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2a2410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M17 11a4 4 0 1 0-4-4"/><path d="M1 21v-1a6 6 0 0 1 12 0v1"/><path d="M23 21v-1a6 6 0 0 0-6-6"/></svg></div>
-        <h3>Sell Together</h3>
-        <p>When enough neighbours report the same crop in real surplus, the app surfaces a prompt to coordinate a shared sale.</p>
+        <h3 data-i18n="f2Title">Sell Together</h3>
+        <p data-i18n="f2Desc">When enough neighbours report the same crop in real surplus, the app surfaces a prompt to coordinate a shared sale.</p>
       </div>
       <div class="feature">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2a2410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-3-3L3 17.4"/></svg></div>
-        <h3>Live Price Trend</h3>
-        <p>A genuine regression, computed on the spot from crowd reports, showing whether prices are rising or falling.</p>
+        <h3 data-i18n="f3Title">Live Price Trend</h3>
+        <p data-i18n="f3Desc">A genuine regression, computed on the spot from crowd reports, showing whether prices are rising or falling.</p>
       </div>
     </div>
   </div>
@@ -252,19 +261,68 @@ a{color:inherit;text-decoration:none;}
 
 <section class="section final-cta" id="demo">
   <div class="reveal">
-    <h2>Step into the working prototype</h2>
-    <p class="lead" style="margin:0 auto 26px;">Every mechanic described here is real code, running live, in your browser, right now.</p>
-    <a class="btn btn-dark" href="index.html"><span class="sweep"></span>Open Ur Sandhai →</a>
+    <h2 data-i18n="finalH2">Step into the working prototype</h2>
+    <p class="lead" style="margin:0 auto 26px;" data-i18n="finalLead">Every mechanic described here is real code, running live, in your browser, right now.</p>
+    <a class="btn btn-dark" href="index.html"><span class="sweep"></span><span data-i18n="finalCta">Open Ur Sandhai →</span></a>
   </div>
 </section>
 
 <div class="footer-note">
-  Ur Sandhai — built for AI for Bharat, AgriTech track, individual entry.
+  <span data-i18n="footer">Ur Sandhai — built for AI for Bharat, AgriTech track, individual entry.</span>
   <a href="https://github.com/sruthisureshkumar-arch/ursandhai">Source on GitHub</a>
 </div>
 
 <script>
 (function(){
+  // Bilingual UI: every user-facing string lives here in English and Tamil.
+  // applyLang() drives every element tagged with data-i18n, and the toggle
+  // in the nav switches between them live, no page reload.
+  var I18N = {
+    navHome:{en:"Home",ta:"முகப்பு"},
+    navProblem:{en:"Problem",ta:"சிக்கல்"},
+    navFeatures:{en:"Features",ta:"அம்சங்கள்"},
+    navDemo:{en:"Demo",ta:"டெமோ"},
+    navContact:{en:"Contact",ta:"தொடர்பு"},
+    navCta:{en:"Try the demo →",ta:"டெமோவைக் காணுங்கள் →"},
+    eyebrow:{en:"AI for Bharat · AgriTech",ta:"AI for Bharat · விவசாய தொழில்நுட்பம்"},
+    heroLine1:{en:"See the Market Clearly,",ta:"சந்தையை தெளிவாகக் காணுங்கள்,"},
+    heroAccent:{en:"Village by Village.",ta:"ஊர் ஊராக."},
+    heroSub:{en:"Hyperlocal prices and fair offers, gathered by the farmers who grow the harvest, delivered in Tamil and English, the moment it matters.",ta:"பயிரிடும் விவசாயிகளே சேகரிக்கும் உள்ளூர் விலைகளும் நியாயமான ஒப்பந்தங்களும், தமிழிலும் ஆங்கிலத்திலும், தேவையான நேரத்தில் கிடைக்கும்."},
+    ctaTry:{en:"Try the Demo →",ta:"டெமோவைப் பயன்படுத்துங்கள் →"},
+    ctaHow:{en:"◎ How It Works",ta:"◎ இது எப்படி வேலை செய்கிறது"},
+    caption:{en:"Real reports, real neighbours, real time.",ta:"உண்மையான தகவல்கள், உண்மையான அண்டை விவசாயிகள், நேரடியாக."},
+    sourceLink:{en:"Open Source on GitHub",ta:"GitHub-இல் மூலக்குறியீடு"},
+    problemH2:{en:"An offer only a neighbour can verify",ta:"அண்டை விவசாயி மட்டுமே சரிபார்க்கக்கூடிய விலை"},
+    problemLead:{en:"A farmer standing in front of a buyer rarely knows whether the price on the table is fair. Government mandi prices arrive a day late and describe an entire district, not the specific village, the specific hour, or the specific buyer standing in front of them right now. Ur Sandhai closes that gap with the people already closest to it: nearby farmers, reporting in real time.",ta:"வாங்குபவர் முன் நிற்கும் விவசாயிக்கு, விலை நியாயமானதா என்று பெரும்பாலும் தெரியாது. அரசு சந்தை விலைகள் ஒரு நாள் தாமதமாக வரும், மேலும் அவை ஒரு மாவட்டம் முழுவதையும் குறிக்கும், குறிப்பிட்ட ஊரையோ, நேரத்தையோ, முன்னால் நிற்கும் வாங்குபவரையோ அல்ல. Ur Sandhai இந்த இடைவெளியை அருகிலுள்ள விவசாயிகள் மூலமாக நேரடியாக மூடுகிறது."},
+    featuresH2:{en:"Built for the moment of the sale",ta:"விற்பனை நேரத்திற்காக வடிவமைக்கப்பட்டது"},
+    featuresLead:{en:"Three mechanics, all running live in the working prototype, aimed at the instant a farmer decides whether to sell.",ta:"விவசாயி விற்குமா வேண்டாமா என முடிவெடுக்கும் அந்த நொடிக்காக வடிவமைக்கப்பட்ட மூன்று செயல்பாடுகள், அனைத்தும் இயங்கும் முன்மாதிரியில் நேரடியாக இயங்குகின்றன."},
+    f1Title:{en:"Fair Offer Check",ta:"நியாயமான விலை சோதனை"},
+    f1Desc:{en:"Enter the price a buyer just offered and get an instant, bilingual verdict against the live local average.",ta:"வாங்குபவர் கூறிய விலையை உள்ளிடவும், உள்ளூர் சராசரியுடன் ஒப்பிட்டு உடனடி, இருமொழி முடிவைப் பெறவும்."},
+    f2Title:{en:"Sell Together",ta:"சேர்ந்து விற்பனை"},
+    f2Desc:{en:"When enough neighbours report the same crop in real surplus, the app surfaces a prompt to coordinate a shared sale.",ta:"அருகிலுள்ள பல விவசாயிகள் ஒரே பயிரை அதிகமாக விற்கும்போது, சேர்ந்து விற்க ஒரு பரிந்துரையை பயன்பாடு காட்டுகிறது."},
+    f3Title:{en:"Live Price Trend",ta:"நேரடி விலைப் போக்கு"},
+    f3Desc:{en:"A genuine regression, computed on the spot from crowd reports, showing whether prices are rising or falling.",ta:"கூட்டு தகவல்களிலிருந்து உடனுக்குடன் கணக்கிடப்படும் உண்மையான போக்கு மாதிரி, விலை ஏறுகிறதா இறங்குகிறதா எனக் காட்டுகிறது."},
+    finalH2:{en:"Step into the working prototype",ta:"செயல்படும் முன்மாதிரிக்குள் நுழையுங்கள்"},
+    finalLead:{en:"Every mechanic described here is real code, running live, in your browser, right now.",ta:"இங்கே விவரிக்கப்பட்ட ஒவ்வொன்றும் உண்மையான குறியீடு, இப்போது உங்கள் உலாவியில் நேரடியாக இயங்குகிறது."},
+    finalCta:{en:"Open Ur Sandhai →",ta:"Ur Sandhai-ஐ திற →"},
+    footer:{en:"Ur Sandhai — built for AI for Bharat, AgriTech track, individual entry.",ta:"Ur Sandhai — AI for Bharat, AgriTech பிரிவுக்காக, தனிநபர் பங்கேற்பாக உருவாக்கப்பட்டது."}
+  };
+  var currentLang = 'en';
+  function applyLang(lang){
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var entry = I18N[el.getAttribute('data-i18n')];
+      if (entry) el.textContent = entry[lang];
+    });
+    document.querySelectorAll('#langToggle .opt').forEach(function(o){
+      o.classList.toggle('active', o.getAttribute('data-lang') === lang);
+    });
+  }
+  document.getElementById('langToggle').addEventListener('click', function(){
+    applyLang(currentLang === 'en' ? 'ta' : 'en');
+  });
+
   window.addEventListener('load', function(){
     setTimeout(function(){ document.getElementById('boot-fade').classList.add('done'); }, 50);
   });
