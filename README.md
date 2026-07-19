@@ -61,6 +61,7 @@ require microphone permission and work best as a real page rather than an embedd
 
 ## Roadmap
 
+- Deploy `agmarknet-proxy.js`, a Cloudflare Worker already written and included in this repo, so the baseline price object can pull live data.gov.in Agmarknet figures behind a server-held API key instead of a dated static snapshot (see the file's header comment for the exact deploy steps and the reasoning for not wiring it in live for this round)
 - Wire in real AWS calls (Transcribe, Rekognition, Textract, Polly) behind the interfaces
   this prototype already exposes
 - Add the buyer-reputation Google Maps link
