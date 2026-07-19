@@ -691,20 +691,22 @@ var text=(result.data.text||"").trim();
 var nums=text.match(/\d+(\.\d+)?/g);
 return nums&&nums.length?Math.max.apply(null,nums.map(Number)):null;
 }
-function runOcr(fileOrBlob,fallbackFile){
+function runOcr(fileOrBlob){
 var status=document.getElementById("us-mic-status");
 status.textContent="Loading the OCR engine...";
 loadTesseract(function(){
 status.textContent="Reading the price...";
-// Three passes, reusing one worker so the language model only loads once.
+// Two passes, reusing one worker so the language model only loads once.
 // Pass 1 is digit-only, sparse-text mode on the (now cropped) image,
-// locking onto the number rather than any letters. Pass 2 clears the
-// whitelist to read whatever crop name is printed or handwritten nearby.
-// If someone cropped tightly around just the price digits, the name may
-// simply not be present in that crop at all, no amount of OCR tuning can
-// read text that isn't in the image, so pass 3 falls back to the original,
-// uncropped photo for the crop-name search specifically (not the price,
-// which is exactly what tight cropping was needed to fix).
+// locking onto the number rather than any letters, this is the part
+// that's proven reliable. Pass 2 clears the whitelist to read whatever
+// crop name is in the same crop, with fuzzy matching against
+// CROP_KEYWORDS to tolerate a misread letter or two. A third pass that
+// fell back to the full, uncropped photo when this crop didn't contain
+// the name was tried and dropped: it added a recognize() call over a
+// busy, uncropped image, which is exactly the situation that breaks
+// Tesseract's layout analysis, and it correlated with the price reading
+// getting worse too, not just the crop-name match failing to improve.
 var worker,priceBest=null;
 Tesseract.createWorker("eng").then(function(w){
 worker=w;
@@ -718,20 +720,9 @@ return worker.setParameters({tessedit_char_whitelist:""});
 }).then(function(){
 return worker.recognize(fileOrBlob);
 }).then(function(textResult){
+worker.terminate();
 var rawText=textResult.data.text||"";
 var matchedCrop=matchCropFromText(rawText);
-if(matchedCrop||!fallbackFile){
-worker.terminate();
-return{matchedCrop:matchedCrop,rawText:rawText};
-}
-status.textContent="Checking the full photo for the crop name...";
-return worker.recognize(fallbackFile).then(function(fallbackResult){
-worker.terminate();
-var fallbackText=fallbackResult.data.text||"";
-return{matchedCrop:matchCropFromText(fallbackText),rawText:rawText+" / "+fallbackText};
-});
-}).then(function(res){
-var matchedCrop=res.matchedCrop;
 var parts=[];
 if(priceBest!=null){
 document.getElementById("us-price").value=priceBest;
@@ -747,7 +738,7 @@ status.textContent="Read from the photo: "+parts.join(", ")+". Check it before s
 // Price found but no crop matched: show what OCR actually saw for the
 // crop-name text, rather than a silent miss, since without it there's
 // no way to tell an OCR misread apart from a keyword-matching gap.
-var seen=res.rawText.replace(/\s+/g," ").trim().slice(0,50);
+var seen=rawText.replace(/\s+/g," ").trim().slice(0,50);
 status.textContent="Read from the photo: "+parts.join(", ")+". Crop name read as \""+(seen||"nothing readable")+"\" — didn't match a known crop, pick it manually. Check the price before submitting.";
 }else{
 status.textContent="Couldn't find a clear price or crop name in that crop. Try framing just the price board, or enter both by hand.";
@@ -845,7 +836,7 @@ runOcr(cropState.file);
 };
 document.getElementById("us-crop-confirm").onclick=function(){
 closeCropModal();
-getCroppedBlob(function(blob){runOcr(blob,cropState.file);});
+getCroppedBlob(function(blob){runOcr(blob);});
 };
 fillSelects();
 render();
