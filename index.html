@@ -217,6 +217,14 @@ var BASELINE={tomato:24,brinjal:36,okra:28,onion:31,chilli:59};
 // Real Thanjavur-district market towns (Tamil Nadu), at their actual
 // coordinates, standing in for "your location" until the app can read GPS.
 var VILLAGES=[{id:"v1",name:"Thanjavur",lat:10.79,lng:79.14},{id:"v2",name:"Kumbakonam",lat:10.96,lng:79.38},{id:"v3",name:"Mannargudi",lat:10.66,lng:79.45}];
+// Local variation applied on top of the sourced BASELINE anchor, one
+// multiplier per market. This is an illustrative adjustment, not a separate
+// government figure for each town, since the state-level Agmarknet snapshot
+// this app uses doesn't break prices out market by market. It exists so
+// switching "your location" genuinely changes what you see, the way real
+// mandis do vary price for the same crop on the same day, rather than
+// silently reusing identical numbers everywhere as the app previously did.
+var VILLAGE_ADJUST={v1:1.00,v2:1.05,v3:0.94};
 var now=Date.now();
 function hrsAgo(h){return now-h*3600*1000;}
 var STORE_KEY="us_sandhai_reports_v1";
@@ -260,7 +268,7 @@ var reports=loadReports();
 var state={villageId:"v1"};
 function center(){var v=VILLAGES.find(function(x){return x.id===state.villageId});return v;}
 function haversine(lat1,lng1,lat2,lng2){var R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.sqrt(a));}
-function nearby(){var c=center();return reports.map(function(r){var lat=c.lat+r.dLat,lng=c.lng+r.dLng;var dist=haversine(c.lat,c.lng,lat,lng);return Object.assign({},r,{lat:lat,lng:lng,dist:dist});}).filter(function(r){return r.dist<=10 && (now-r.time)<=72*3600*1000;});
+function nearby(){var c=center();var adj=VILLAGE_ADJUST[state.villageId]||1;return reports.map(function(r){var lat=c.lat+r.dLat,lng=c.lng+r.dLng;var dist=haversine(c.lat,c.lng,lat,lng);var price=Math.round(r.price*adj);return Object.assign({},r,{lat:lat,lng:lng,dist:dist,price:price});}).filter(function(r){return r.dist<=10 && (now-r.time)<=72*3600*1000;});
 }
 function fillSelects(){
 var vs=document.getElementById("us-village");vs.innerHTML=VILLAGES.map(function(v){return '<option value="'+v.id+'">'+v.name+'</option>';}).join("");
