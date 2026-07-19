@@ -517,6 +517,31 @@ reports=seedReports();
 document.getElementById("us-mic-status").textContent="Sample data reset.";
 render();
 };
+// Recognition is locked to ta-IN, so even a farmer who says an English
+// word gets it transcribed as a Tamil-script phonetic approximation, not
+// the English spelling ("brinjal" comes back as "பிரிஞ்சால்", confirmed
+// against a real transcript). CROPS[k].ta (the formal Tamil name) alone
+// misses that. This list adds common phonetic Tamil renderings of each
+// crop's English name alongside the formal word. Only the brinjal entry
+// is confirmed against real speech so far; the rest are standard phonetic
+// spellings and worth double-checking against a live mic.
+var CROP_VOICE_KEYWORDS={
+tomato:["தக்காளி","தொமேட்டோ","டொமேட்டோ"],
+brinjal:["கத்தரிக்காய்","பிரிஞ்சால்","ப்ரின்ஜல்"],
+okra:["வெண்டைக்காய்","ஓக்ரா"],
+onion:["வெங்காயம்","ஆனியன்"],
+chilli:["மிளகாய்","சில்லி","சிலி"]
+};
+function matchCropFromVoice(text){
+var keys=Object.keys(CROP_VOICE_KEYWORDS);
+for(var i=0;i<keys.length;i++){
+var kws=CROP_VOICE_KEYWORDS[keys[i]];
+for(var j=0;j<kws.length;j++){
+if(text.indexOf(kws[j])>-1) return keys[i];
+}
+}
+return null;
+}
 // A transcript like "tomato 30 rupees 50 kilos" has two numbers, and the
 // old parser only ever looked for one and always called it the price,
 // which meant quantity never got filled in from voice at all. This looks
@@ -557,7 +582,8 @@ status.textContent='Heard: "'+text+'" — parsing crop, price, and quantity.';
 var parsed=parseVoiceNumbers(text);
 if(parsed.price!=null) document.getElementById("us-price").value=parsed.price;
 if(parsed.qty!=null) document.getElementById("us-qty").value=parsed.qty;
-Object.keys(CROPS).forEach(function(k){if(text.indexOf(CROPS[k].ta)>-1||text.toLowerCase().indexOf(k)>-1){document.getElementById("us-crop").value=k;}});
+var voiceCrop=matchCropFromVoice(text)||(CROPS[text.toLowerCase()]?text.toLowerCase():null);
+if(voiceCrop) document.getElementById("us-crop").value=voiceCrop;
 };
 rec.onerror=function(){status.textContent="Couldn't access the microphone.";};
 rec.start();
