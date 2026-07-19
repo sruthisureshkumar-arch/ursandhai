@@ -533,7 +533,22 @@ var status=document.getElementById("us-mic-status");
 status.textContent="Loading the OCR engine...";
 loadTesseract(function(){
 status.textContent="Reading the price board...";
-Tesseract.recognize(file,"eng").then(function(result){
+// A real price-board photo is mostly background — crates, produce, other
+// signage — with the actual number a small, isolated patch of large
+// digits. Tesseract's defaults assume a structured page of mixed text, so
+// on a busy photo it tries to segment the whole scene and can hallucinate
+// letter-shaped noise out of crate lattice and vegetable textures. Two
+// settings fix that: a digit-only whitelist means it can never output
+// anything but numbers, and sparse-text mode (PSM 11) tells it to expect
+// scattered text in no particular order rather than a page layout.
+var worker;
+Tesseract.createWorker("eng").then(function(w){
+worker=w;
+return worker.setParameters({tessedit_char_whitelist:"0123456789.",tessedit_pageseg_mode:"11"});
+}).then(function(){
+return worker.recognize(file);
+}).then(function(result){
+worker.terminate();
 var text=(result.data.text||"").trim();
 var nums=text.match(/\d+(\.\d+)?/g);
 if(nums&&nums.length){
@@ -544,6 +559,7 @@ status.textContent='Read "'+text.slice(0,40).replace(/\s+/g," ")+'" from the pho
 status.textContent="Couldn't find a clear number on that photo. Try a closer, well-lit shot.";
 }
 }).catch(function(){
+if(worker){try{worker.terminate();}catch(e){}}
 status.textContent="Photo reading failed. You can still enter the price by hand.";
 });
 });
