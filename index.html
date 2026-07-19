@@ -517,6 +517,33 @@ reports=seedReports();
 document.getElementById("us-mic-status").textContent="Sample data reset.";
 render();
 };
+// A transcript like "tomato 30 rupees 50 kilos" has two numbers, and the
+// old parser only ever looked for one and always called it the price,
+// which meant quantity never got filled in from voice at all. This looks
+// for a number sitting next to a unit word (கிலோ/kg for quantity,
+// ரூபாய்/rupees/₹ for price) first, and only falls back to plain
+// positional order (first number spoken = price, second = quantity) when
+// the transcript doesn't give an explicit unit to go on.
+function parseVoiceNumbers(text){
+var result={price:null,qty:null};
+var qtyMatch=text.match(/(\d+(?:\.\d+)?)\s*(?:கிலோ|kgs?|kilos?)/i);
+if(qtyMatch) result.qty=parseFloat(qtyMatch[1]);
+var priceMatch=text.match(/(\d+(?:\.\d+)?)\s*(?:ரூபாய்|rupees?|rs\.?|₹)/i)||text.match(/(?:ரூபாய்|rupees?|rs\.?|₹)\s*(\d+(?:\.\d+)?)/i);
+if(priceMatch) result.price=parseFloat(priceMatch[1]);
+var nums=text.match(/\d+(?:\.\d+)?/g);
+if(nums){
+nums=nums.map(Number);
+if(result.price==null){
+var remainingForPrice=result.qty!=null?nums.filter(function(n){return n!==result.qty;}):nums;
+if(remainingForPrice.length) result.price=remainingForPrice[0];
+}
+if(result.qty==null&&nums.length>1){
+var remainingForQty=nums.filter(function(n){return n!==result.price;});
+if(remainingForQty.length) result.qty=remainingForQty[0];
+}
+}
+return result;
+}
 document.getElementById("us-mic").onclick=function(){
 var status=document.getElementById("us-mic-status");
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -526,9 +553,10 @@ var rec=new SR();rec.lang="ta-IN";rec.interimResults=false;
 status.textContent="Listening...";
 rec.onresult=function(e){
 var text=e.results[0][0].transcript;
-status.textContent='Heard: "'+text+'" — parsing crop and price.';
-var priceMatch=text.match(/(\d+)/);
-if(priceMatch) document.getElementById("us-price").value=priceMatch[1];
+status.textContent='Heard: "'+text+'" — parsing crop, price, and quantity.';
+var parsed=parseVoiceNumbers(text);
+if(parsed.price!=null) document.getElementById("us-price").value=parsed.price;
+if(parsed.qty!=null) document.getElementById("us-qty").value=parsed.qty;
 Object.keys(CROPS).forEach(function(k){if(text.indexOf(CROPS[k].ta)>-1||text.toLowerCase().indexOf(k)>-1){document.getElementById("us-crop").value=k;}});
 };
 rec.onerror=function(){status.textContent="Couldn't access the microphone.";};
@@ -606,16 +634,20 @@ var text=(result.data.text||"").trim();
 var nums=text.match(/\d+(\.\d+)?/g);
 return nums&&nums.length?Math.max.apply(null,nums.map(Number)):null;
 }
-function runOcr(fileOrBlob){
+function runOcr(fileOrBlob,fallbackFile){
 var status=document.getElementById("us-mic-status");
 status.textContent="Loading the OCR engine...";
 loadTesseract(function(){
 status.textContent="Reading the price...";
-// Two passes over the same (now cropped) image, reusing one worker so the
-// language model only loads once. Pass 1 is digit-only, sparse-text mode,
+// Three passes, reusing one worker so the language model only loads once.
+// Pass 1 is digit-only, sparse-text mode on the (now cropped) image,
 // locking onto the number rather than any letters. Pass 2 clears the
-// whitelist so it can read whatever crop name is printed or handwritten
-// nearby, matched against CROP_KEYWORDS above.
+// whitelist to read whatever crop name is printed or handwritten nearby.
+// If someone cropped tightly around just the price digits, the name may
+// simply not be present in that crop at all, no amount of OCR tuning can
+// read text that isn't in the image, so pass 3 falls back to the original,
+// uncropped photo for the crop-name search specifically (not the price,
+// which is exactly what tight cropping was needed to fix).
 var worker,priceBest=null;
 Tesseract.createWorker("eng").then(function(w){
 worker=w;
@@ -629,8 +661,18 @@ return worker.setParameters({tessedit_char_whitelist:""});
 }).then(function(){
 return worker.recognize(fileOrBlob);
 }).then(function(textResult){
-worker.terminate();
 var matchedCrop=matchCropFromText(textResult.data.text||"");
+if(matchedCrop||!fallbackFile){
+worker.terminate();
+return{matchedCrop:matchedCrop};
+}
+status.textContent="Checking the full photo for the crop name...";
+return worker.recognize(fallbackFile).then(function(fallbackResult){
+worker.terminate();
+return{matchedCrop:matchCropFromText(fallbackResult.data.text||"")};
+});
+}).then(function(res){
+var matchedCrop=res.matchedCrop;
 var parts=[];
 if(priceBest!=null){
 document.getElementById("us-price").value=priceBest;
@@ -738,7 +780,7 @@ runOcr(cropState.file);
 };
 document.getElementById("us-crop-confirm").onclick=function(){
 closeCropModal();
-getCroppedBlob(function(blob){runOcr(blob);});
+getCroppedBlob(function(blob){runOcr(blob,cropState.file);});
 };
 fillSelects();
 render();
