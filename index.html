@@ -120,6 +120,22 @@
   #us-root .ocr-row{display:flex;gap:8px;margin-top:8px;}
   #us-root .ocr-row button{margin-top:0;flex:1;}
 
+  /* crop-before-OCR modal: verified by direct testing that Tesseract's
+     layout analysis silently drops an oversized, isolated text block (like
+     a bold price number) from a busy photo rather than misreading it, so a
+     quick manual crop before OCR runs is the one thing that reliably fixes
+     recognition on a real, uncropped photo. */
+  #us-crop-modal{display:none;position:fixed;inset:0;background:rgba(20,22,14,0.78);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+  #us-crop-modal.open{display:flex;}
+  #us-crop-box{background:var(--surface);border-radius:16px;padding:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto;}
+  #us-crop-box h4{margin:0 0 4px;font-family:var(--serif);font-style:italic;font-weight:600;color:var(--olive-dark);font-size:18px;}
+  #us-crop-box p{margin:0 0 14px;font-size:12.5px;color:var(--sub);line-height:1.5;}
+  #us-crop-canvas-wrap{position:relative;line-height:0;touch-action:none;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#141410;cursor:crosshair;}
+  #us-crop-canvas-wrap img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none;}
+  #us-crop-selection{position:absolute;border:2px solid var(--gold);background:rgba(201,138,46,0.18);display:none;pointer-events:none;}
+  #us-crop-actions{display:flex;gap:8px;margin-top:16px;}
+  #us-crop-actions button{flex:1;margin-top:0;}
+
   /* reset link */
   #us-root .reset-link{display:inline-block;margin-top:10px;font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;font-family:inherit;}
   #us-root .reset-link:hover{color:var(--olive-dark);}
@@ -169,6 +185,21 @@
 <button class="btn-secondary" id="us-photo-btn">Photograph price board</button>
 </div>
 <input type="file" accept="image/*" capture="environment" id="us-photo" style="display:none;" />
+<div id="us-crop-modal">
+<div id="us-crop-box">
+<h4>Frame the price</h4>
+<p>Drag a box around just the price (and crop name, if close by). Tesseract reads a tight crop far more reliably than a whole busy photo.</p>
+<div id="us-crop-canvas-wrap">
+<img id="us-crop-img" alt="" />
+<div id="us-crop-selection"></div>
+</div>
+<div id="us-crop-actions">
+<button class="btn-secondary" id="us-crop-cancel">Cancel</button>
+<button class="btn-secondary" id="us-crop-skip">Use full photo</button>
+<button class="btn-primary" id="us-crop-confirm">Crop &amp; read</button>
+</div>
+</div>
+</div>
 <button class="btn-primary" id="us-submit">Submit report</button>
 <div class="status" id="us-mic-status"></div>
 </div>
@@ -547,36 +578,56 @@ if(lower.indexOf(kws[j])>-1) return keys[i];
 }
 return null;
 }
-document.getElementById("us-photo-btn").onclick=function(){document.getElementById("us-photo").click();};
-document.getElementById("us-photo").onchange=function(e){
-var file=e.target.files[0];
-if(!file) return;
+// Picking "the biggest number found anywhere in the photo" breaks down on a
+// busy real photo: sparse-text mode scans crate lattice, produce outlines,
+// and other clutter alongside the actual price card, and with the digit
+// whitelist forcing everything into a number guess, background noise can
+// occasionally out-value the real price. Tesseract scores every word with a
+// confidence figure, so picking the number it's most sure about, rather than
+// the largest one, favours the clean printed price over background noise.
+// Falls back to the old "biggest number" approach if word-level data isn't
+// available for some reason, rather than returning nothing.
+function bestNumberFromResult(result){
+var words=result.data&&result.data.words;
+if(words&&words.length){
+var candidates=[];
+for(var i=0;i<words.length;i++){
+var t=(words[i].text||"").trim();
+if(/^\d+(\.\d+)?$/.test(t)){
+candidates.push({value:parseFloat(t),confidence:words[i].confidence||0});
+}
+}
+if(candidates.length){
+candidates.sort(function(a,b){return b.confidence-a.confidence;});
+return candidates[0].value;
+}
+}
+var text=(result.data.text||"").trim();
+var nums=text.match(/\d+(\.\d+)?/g);
+return nums&&nums.length?Math.max.apply(null,nums.map(Number)):null;
+}
+function runOcr(fileOrBlob){
 var status=document.getElementById("us-mic-status");
 status.textContent="Loading the OCR engine...";
 loadTesseract(function(){
 status.textContent="Reading the price...";
-// Two passes over the same photo, reusing one worker so the language
-// model only loads once. Pass 1 is digit-only, sparse-text mode: a real
-// price-board photo is mostly background (crates, produce, other
-// signage), and Tesseract's defaults will try to segment that whole
-// scene and hallucinate letter-shaped noise out of it, so restricting the
-// whitelist keeps it locked onto the number. Pass 2 clears the whitelist
-// so it can read whatever crop name is printed or handwritten alongside
-// the price, matched against CROP_KEYWORDS above.
+// Two passes over the same (now cropped) image, reusing one worker so the
+// language model only loads once. Pass 1 is digit-only, sparse-text mode,
+// locking onto the number rather than any letters. Pass 2 clears the
+// whitelist so it can read whatever crop name is printed or handwritten
+// nearby, matched against CROP_KEYWORDS above.
 var worker,priceBest=null;
 Tesseract.createWorker("eng").then(function(w){
 worker=w;
 return worker.setParameters({tessedit_char_whitelist:"0123456789.",tessedit_pageseg_mode:"11"});
 }).then(function(){
-return worker.recognize(file);
+return worker.recognize(fileOrBlob);
 }).then(function(priceResult){
-var priceText=(priceResult.data.text||"").trim();
-var nums=priceText.match(/\d+(\.\d+)?/g);
-priceBest=nums&&nums.length?Math.max.apply(null,nums.map(Number)):null;
+priceBest=bestNumberFromResult(priceResult);
 status.textContent="Reading the crop name...";
 return worker.setParameters({tessedit_char_whitelist:""});
 }).then(function(){
-return worker.recognize(file);
+return worker.recognize(fileOrBlob);
 }).then(function(textResult){
 worker.terminate();
 var matchedCrop=matchCropFromText(textResult.data.text||"");
@@ -592,13 +643,102 @@ parts.push(CROPS[matchedCrop].en+" selected");
 if(parts.length){
 status.textContent="Read from the photo: "+parts.join(", ")+". Check it before submitting.";
 }else{
-status.textContent="Couldn't find a clear price or crop name on that photo. Try a closer, well-lit shot, or enter both by hand.";
+status.textContent="Couldn't find a clear price or crop name in that crop. Try framing just the price board, or enter both by hand.";
 }
 }).catch(function(){
 if(worker){try{worker.terminate();}catch(e){}}
 status.textContent="Photo reading failed. You can still enter the price and crop by hand.";
 });
 });
+}
+// Crop-before-OCR: verified by direct testing that Tesseract's layout
+// analysis can silently drop an oversized, isolated text block (a bold
+// price number) from a busy photo rather than misreading it, so a manual
+// crop before OCR runs is what actually fixes recognition on a real photo,
+// not further parameter tuning. Selecting a photo opens a small modal to
+// drag a box around the price board; "Use full photo" skips straight to
+// OCR on the original image for anyone who'd rather not crop.
+var cropState={file:null,imgNatW:0,imgNatH:0,dragging:false,startX:0,startY:0,rect:null};
+function openCropModal(file){
+cropState.file=file;
+cropState.rect=null;
+var img=document.getElementById("us-crop-img");
+var reader=new FileReader();
+reader.onload=function(e){
+img.onload=function(){
+cropState.imgNatW=img.naturalWidth;
+cropState.imgNatH=img.naturalHeight;
+document.getElementById("us-crop-selection").style.display="none";
+document.getElementById("us-crop-modal").classList.add("open");
+};
+img.src=e.target.result;
+};
+reader.readAsDataURL(file);
+}
+function closeCropModal(){
+document.getElementById("us-crop-modal").classList.remove("open");
+}
+function cropPointerPos(e,wrap){
+var r=wrap.getBoundingClientRect();
+var pt=e.touches&&e.touches.length?e.touches[0]:e;
+var cx=pt.clientX-r.left,cy=pt.clientY-r.top;
+return{x:Math.max(0,Math.min(cx,r.width)),y:Math.max(0,Math.min(cy,r.height)),wrapW:r.width,wrapH:r.height};
+}
+(function(){
+var wrap=document.getElementById("us-crop-canvas-wrap");
+var sel=document.getElementById("us-crop-selection");
+function start(e){
+var p=cropPointerPos(e,wrap);
+cropState.dragging=true;cropState.startX=p.x;cropState.startY=p.y;
+sel.style.left=p.x+"px";sel.style.top=p.y+"px";sel.style.width="0px";sel.style.height="0px";
+sel.style.display="block";
+e.preventDefault();
+}
+function move(e){
+if(!cropState.dragging) return;
+var p=cropPointerPos(e,wrap);
+var x=Math.min(p.x,cropState.startX),y=Math.min(p.y,cropState.startY);
+var w=Math.abs(p.x-cropState.startX),h=Math.abs(p.y-cropState.startY);
+sel.style.left=x+"px";sel.style.top=y+"px";sel.style.width=w+"px";sel.style.height=h+"px";
+cropState.rect={x:x,y:y,w:w,h:h,wrapW:p.wrapW,wrapH:p.wrapH};
+e.preventDefault();
+}
+function end(){cropState.dragging=false;}
+wrap.addEventListener("mousedown",start);
+wrap.addEventListener("mousemove",move);
+window.addEventListener("mouseup",end);
+wrap.addEventListener("touchstart",start,{passive:false});
+wrap.addEventListener("touchmove",move,{passive:false});
+window.addEventListener("touchend",end);
+})();
+function getCroppedBlob(cb){
+var rect=cropState.rect;
+if(!rect||rect.w<8||rect.h<8){cb(cropState.file);return;}
+var scaleX=cropState.imgNatW/rect.wrapW,scaleY=cropState.imgNatH/rect.wrapH;
+var sx=rect.x*scaleX,sy=rect.y*scaleY,sw=rect.w*scaleX,sh=rect.h*scaleY;
+var canvas=document.createElement("canvas");
+canvas.width=sw;canvas.height=sh;
+var ctx=canvas.getContext("2d");
+ctx.drawImage(document.getElementById("us-crop-img"),sx,sy,sw,sh,0,0,sw,sh);
+canvas.toBlob(function(blob){cb(blob||cropState.file);},"image/png");
+}
+document.getElementById("us-photo-btn").onclick=function(){document.getElementById("us-photo").click();};
+document.getElementById("us-photo").onchange=function(e){
+var file=e.target.files[0];
+if(!file) return;
+openCropModal(file);
+};
+document.getElementById("us-crop-cancel").onclick=function(){
+closeCropModal();
+document.getElementById("us-photo").value="";
+};
+document.getElementById("us-crop-skip").onclick=function(){
+closeCropModal();
+runOcr(cropState.file);
+};
+document.getElementById("us-crop-confirm").onclick=function(){
+closeCropModal();
+getCroppedBlob(function(blob){runOcr(blob);});
 };
 fillSelects();
 render();
