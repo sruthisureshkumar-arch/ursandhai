@@ -621,13 +621,44 @@ okra:["okra","bhindi","ladies finger","lady's finger","ladyfinger"],
 onion:["onion","onions"],
 chilli:["chilli","chili","chillies","chilies"]
 };
+function levenshtein(a,b){
+var m=a.length,n=b.length,d=[],i,j;
+for(i=0;i<=m;i++){d[i]=[i];}
+for(j=0;j<=n;j++){d[0][j]=j;}
+for(i=1;i<=m;i++){
+for(j=1;j<=n;j++){
+var cost=a[i-1]===b[j-1]?0:1;
+d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+cost);
+}
+}
+return d[m][n];
+}
 function matchCropFromText(text){
 var lower=text.toLowerCase();
 var keys=Object.keys(CROP_KEYWORDS);
+// Exact substring match first: fast, and never produces a false positive.
 for(var i=0;i<keys.length;i++){
 var kws=CROP_KEYWORDS[keys[i]];
 for(var j=0;j<kws.length;j++){
 if(lower.indexOf(kws[j])>-1) return keys[i];
+}
+}
+// Fuzzy fallback: handwriting OCR can misread a letter or two even when
+// it's found the right word, so an exact match alone misses real hits.
+// Compare each word Tesseract found against each keyword by edit
+// distance, accepting roughly one wrong character per four rather than
+// demanding a perfect read.
+var words=lower.split(/[^a-z]+/).filter(function(w){return w.length>=3;});
+for(var i2=0;i2<keys.length;i2++){
+var kws2=CROP_KEYWORDS[keys[i2]];
+for(var j2=0;j2<kws2.length;j2++){
+var kw=kws2[j2];
+for(var w=0;w<words.length;w++){
+var word=words[w];
+if(Math.abs(word.length-kw.length)>3) continue;
+var tolerance=Math.max(1,Math.floor(kw.length/4));
+if(levenshtein(word,kw)<=tolerance) return keys[i2];
+}
 }
 }
 return null;
@@ -687,15 +718,17 @@ return worker.setParameters({tessedit_char_whitelist:""});
 }).then(function(){
 return worker.recognize(fileOrBlob);
 }).then(function(textResult){
-var matchedCrop=matchCropFromText(textResult.data.text||"");
+var rawText=textResult.data.text||"";
+var matchedCrop=matchCropFromText(rawText);
 if(matchedCrop||!fallbackFile){
 worker.terminate();
-return{matchedCrop:matchedCrop};
+return{matchedCrop:matchedCrop,rawText:rawText};
 }
 status.textContent="Checking the full photo for the crop name...";
 return worker.recognize(fallbackFile).then(function(fallbackResult){
 worker.terminate();
-return{matchedCrop:matchCropFromText(fallbackResult.data.text||"")};
+var fallbackText=fallbackResult.data.text||"";
+return{matchedCrop:matchCropFromText(fallbackText),rawText:rawText+" / "+fallbackText};
 });
 }).then(function(res){
 var matchedCrop=res.matchedCrop;
@@ -708,8 +741,14 @@ if(matchedCrop){
 document.getElementById("us-crop").value=matchedCrop;
 parts.push(CROPS[matchedCrop].en+" selected");
 }
-if(parts.length){
+if(parts.length&&matchedCrop){
 status.textContent="Read from the photo: "+parts.join(", ")+". Check it before submitting.";
+}else if(parts.length){
+// Price found but no crop matched: show what OCR actually saw for the
+// crop-name text, rather than a silent miss, since without it there's
+// no way to tell an OCR misread apart from a keyword-matching gap.
+var seen=res.rawText.replace(/\s+/g," ").trim().slice(0,50);
+status.textContent="Read from the photo: "+parts.join(", ")+". Crop name read as \""+(seen||"nothing readable")+"\" — didn't match a known crop, pick it manually. Check the price before submitting.";
 }else{
 status.textContent="Couldn't find a clear price or crop name in that crop. Try framing just the price board, or enter both by hand.";
 }
