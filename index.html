@@ -202,7 +202,7 @@
 <p class="ta" id="us-coop-ta"></p>
 <button class="btn-share" id="us-coop-share"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.2-1.3-.8-.7-1.4-1.6-1.5-1.9-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.9-2.1-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.1 0 1.2.9 2.4 1 2.6.1.2 1.8 2.8 4.4 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.6.1.5-.1 1.7-.7 1.9-1.3.2-.6.2-1.2.2-1.3-.1-.1-.2-.2-.5-.3z"/><path d="M12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.7 1.5 5.2L2 22l4.9-1.4C8.3 21.5 10.1 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.7 0-3.3-.5-4.7-1.3l-.3-.2-3 .8.8-2.9-.2-.3C3.9 15 3.3 13.5 3.3 12c0-4.8 3.9-8.7 8.7-8.7s8.7 3.9 8.7 8.7-3.9 8.7-8.7 8.7z"/></svg><span data-share-label>Share to coordinate</span></button>
 </div>
-<div class="note">Voice capture and read-aloud use the browser's own free speech APIs, an honest stand-in for Amazon Transcribe and Polly. Price-board photos are read with Tesseract.js, an open-source OCR engine executing the recognition entirely client-side. The price trend above is a genuine linear-regression model computed live from crowd reports, a lightweight stand-in for the Prophet-based forecaster planned for production. Baseline prices are calibrated to real Tamil Nadu wholesale vegetable rates, and wherever a live Agmarknet-linked market report existed for a specific crop at Thanjavur, Kumbakonam, or Mannargudi (dated 19 Jul 2026), that real per-market number replaces the state-level estimate; the rest fall back to a disclosed illustrative adjustment. None of it is randomly generated. Live crowd reports still come from whoever uses this demo. A direct data.gov.in Agmarknet feed and crop identification from a photograph of the produce itself remain on the roadmap.</div>
+<div class="note">Voice capture and read-aloud use the browser's own free speech APIs, an honest stand-in for Amazon Transcribe and Polly. Price-board photos are read with Tesseract.js, an open-source OCR engine executing the recognition entirely client-side, in two passes: one locked to digits for the price, one reading free text to match a crop name against a small keyword list (English signage only, for now). The price trend above is a genuine linear-regression model computed live from crowd reports, a lightweight stand-in for the Prophet-based forecaster planned for production. Baseline prices are calibrated to real Tamil Nadu wholesale vegetable rates, and wherever a live Agmarknet-linked market report existed for a specific crop at Thanjavur, Kumbakonam, or Mannargudi (dated 19 Jul 2026), that real per-market number replaces the state-level estimate; the rest fall back to a disclosed illustrative adjustment. None of it is randomly generated. Live crowd reports still come from whoever uses this demo. A direct data.gov.in Agmarknet feed and crop identification from a photograph of the produce itself remain on the roadmap.</div>
 </div>
 </div>
 </div>
@@ -525,6 +525,28 @@ s.onload=cb;
 s.onerror=function(){document.getElementById("us-mic-status").textContent="Couldn't load the OCR engine. Check your internet connection.";};
 document.head.appendChild(s);
 }
+// Keyword list for matching a crop name out of the photo's free-text OCR
+// pass. English only for now: a sign written purely in Tamil script won't
+// be picked up, since that would need a second, larger language model
+// (tam) loaded on top of eng, which this round doesn't do.
+var CROP_KEYWORDS={
+tomato:["tomato","tomatoes"],
+brinjal:["brinjal","brinjol","eggplant","aubergine"],
+okra:["okra","bhindi","ladies finger","lady's finger","ladyfinger"],
+onion:["onion","onions"],
+chilli:["chilli","chili","chillies","chilies"]
+};
+function matchCropFromText(text){
+var lower=text.toLowerCase();
+var keys=Object.keys(CROP_KEYWORDS);
+for(var i=0;i<keys.length;i++){
+var kws=CROP_KEYWORDS[keys[i]];
+for(var j=0;j<kws.length;j++){
+if(lower.indexOf(kws[j])>-1) return keys[i];
+}
+}
+return null;
+}
 document.getElementById("us-photo-btn").onclick=function(){document.getElementById("us-photo").click();};
 document.getElementById("us-photo").onchange=function(e){
 var file=e.target.files[0];
@@ -532,35 +554,49 @@ if(!file) return;
 var status=document.getElementById("us-mic-status");
 status.textContent="Loading the OCR engine...";
 loadTesseract(function(){
-status.textContent="Reading the price board...";
-// A real price-board photo is mostly background — crates, produce, other
-// signage — with the actual number a small, isolated patch of large
-// digits. Tesseract's defaults assume a structured page of mixed text, so
-// on a busy photo it tries to segment the whole scene and can hallucinate
-// letter-shaped noise out of crate lattice and vegetable textures. Two
-// settings fix that: a digit-only whitelist means it can never output
-// anything but numbers, and sparse-text mode (PSM 11) tells it to expect
-// scattered text in no particular order rather than a page layout.
-var worker;
+status.textContent="Reading the price...";
+// Two passes over the same photo, reusing one worker so the language
+// model only loads once. Pass 1 is digit-only, sparse-text mode: a real
+// price-board photo is mostly background (crates, produce, other
+// signage), and Tesseract's defaults will try to segment that whole
+// scene and hallucinate letter-shaped noise out of it, so restricting the
+// whitelist keeps it locked onto the number. Pass 2 clears the whitelist
+// so it can read whatever crop name is printed or handwritten alongside
+// the price, matched against CROP_KEYWORDS above.
+var worker,priceBest=null;
 Tesseract.createWorker("eng").then(function(w){
 worker=w;
 return worker.setParameters({tessedit_char_whitelist:"0123456789.",tessedit_pageseg_mode:"11"});
 }).then(function(){
 return worker.recognize(file);
-}).then(function(result){
+}).then(function(priceResult){
+var priceText=(priceResult.data.text||"").trim();
+var nums=priceText.match(/\d+(\.\d+)?/g);
+priceBest=nums&&nums.length?Math.max.apply(null,nums.map(Number)):null;
+status.textContent="Reading the crop name...";
+return worker.setParameters({tessedit_char_whitelist:""});
+}).then(function(){
+return worker.recognize(file);
+}).then(function(textResult){
 worker.terminate();
-var text=(result.data.text||"").trim();
-var nums=text.match(/\d+(\.\d+)?/g);
-if(nums&&nums.length){
-var best=Math.max.apply(null,nums.map(Number));
-document.getElementById("us-price").value=best;
-status.textContent='Read "'+text.slice(0,40).replace(/\s+/g," ")+'" from the photo, set price to ₹'+best+'/kg. Check it before submitting.';
+var matchedCrop=matchCropFromText(textResult.data.text||"");
+var parts=[];
+if(priceBest!=null){
+document.getElementById("us-price").value=priceBest;
+parts.push("price ₹"+priceBest+"/kg");
+}
+if(matchedCrop){
+document.getElementById("us-crop").value=matchedCrop;
+parts.push(CROPS[matchedCrop].en+" selected");
+}
+if(parts.length){
+status.textContent="Read from the photo: "+parts.join(", ")+". Check it before submitting.";
 }else{
-status.textContent="Couldn't find a clear number on that photo. Try a closer, well-lit shot.";
+status.textContent="Couldn't find a clear price or crop name on that photo. Try a closer, well-lit shot, or enter both by hand.";
 }
 }).catch(function(){
 if(worker){try{worker.terminate();}catch(e){}}
-status.textContent="Photo reading failed. You can still enter the price by hand.";
+status.textContent="Photo reading failed. You can still enter the price and crop by hand.";
 });
 });
 };
