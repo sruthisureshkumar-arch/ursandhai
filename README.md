@@ -67,7 +67,6 @@ require microphone permission and work best as a real page rather than an embedd
 - Add the buyer-reputation Google Maps link
 - Move recommendation scoring to a backend with persistent storage (Supabase/Postgres)
 - Replace the time-bucket average with a Prophet/scikit-learn forecasting model
-- Give farmers a way to actually contact each other through the Sell Together nudge
 
 ## What sets this apart
 
@@ -79,8 +78,9 @@ mechanics built for the exact moment a farmer decides whether to sell:
   bilingual verdict against the live local average.
 - **Sell Together** watches for genuine oversupply among nearby crowd reports and
   surfaces a prompt to coordinate a shared sale, turning a penalty the scoring model
-  already computes into something actionable, though it remains a prompt rather than a
-  coordination tool: it doesn't yet connect farmers to one another directly.
+  already computes into something actionable. A "Share to coordinate" button opens
+  WhatsApp with a real, pre-filled bilingual message summarising the oversupply, so the
+  nudge ends in an actual message a farmer can send, not just a suggestion on screen.
 - **Live price trend** is a real ordinary-least-squares regression, run in the browser
   against whatever crowd reports currently exist, rather than a static number.
 

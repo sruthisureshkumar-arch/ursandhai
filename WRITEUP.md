@@ -132,10 +132,11 @@ price movement, though it remains an estimate: this prototype has not
 been piloted with real farmers, and no outcome data exists behind that
 figure yet. Sell Together is a narrower and more honest claim than a
 promise of collective bargaining power: it surfaces a timely suggestion
-when real oversupply is detected nearby. It does not yet give farmers a
-way to contact one another directly, so today it functions as a heads-up,
-not the coordination infrastructure an organised cooperative would
-provide.
+when real oversupply is detected nearby, and a "Share to coordinate"
+button turns that suggestion into a real, pre-filled WhatsApp message a
+farmer can actually send to a group. That closes the loop from nudge to
+action, though it still stops at a message, not the standing coordination
+infrastructure an organised cooperative would provide.
 
 ## Scope, stated plainly
 
